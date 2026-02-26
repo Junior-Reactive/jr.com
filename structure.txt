@@ -1,0 +1,113 @@
+D:\JR.React\
+│
+├── 📁 backend/
+│   ├── 📄 .env
+│   ├── 📄 package.json
+│   ├── 📄 server-fixed.js
+│   ├── 📄 server.js
+│   ├── 📄 test-connection.js
+│   ├── 📄 test-connection-fixed.js
+│   ├── 📄 test-connection-final.js
+│   ├── 📄 simple-test.js
+│   ├── 📄 working-test.js
+│   ├── 📄 create-full-schema.js
+│   ├── 📄 create-schema.js
+│   ├── 📄 create-tables.js
+│   │
+│   ├── 📁 config/
+│   │   ├── 📄 db.js
+│   │   └── 📄 env.js
+│   │
+│   ├── 📁 controllers/
+│   │   ├── 📄 contentController.js
+│   │   └── 📄 submissionController.js
+│   │
+│   ├── 📁 routes/
+│   │   ├── 📄 contentRoutes.js
+│   │   └── 📄 submissionRoutes.js
+│   │
+│   ├── 📁 middleware/
+│   │   ├── 📄 validation.js
+│   │   └── 📄 errorHandler.js
+│   │
+│   ├── 📁 models/
+│   │   ├── 📄 serviceModel.js
+│   │   ├── 📄 blogModel.js
+│   │   ├── 📄 portfolioModel.js
+│   │   ├── 📄 contactModel.js
+│   │   └── 📄 applicationModel.js
+│   │
+│   ├── 📁 utils/
+│   │   └── 📄 email.js
+│   │
+│   └── 📁 scripts/
+│       └── 📄 migrate-xml.js
+│
+├── 📁 frontend/
+│   ├── 📄 .env
+│   ├── 📄 package.json
+│   │
+│   ├── 📁 public/
+│   │   ├── 📄 index.html
+│   │   └── 🖼️ logo.png (place your logo here)
+│   │
+│   └── 📁 src/
+│       ├── 📄 index.js
+│       ├── 📄 App.js
+│       │
+│       ├── 📁 assets/
+│       │   └── 📁 css/
+│       │       ├── 📄 variables.css
+│       │       └── 📄 global.css
+│       │
+│       ├── 📁 components/
+│       │   ├── 📁 common/
+│       │   │   ├── 📄 Header.jsx
+│       │   │   ├── 📄 Header.css
+│       │   │   ├── 📄 Footer.jsx
+│       │   │   ├── 📄 Button.jsx
+│       │   │   └── 📄 Card.jsx
+│       │   │
+│       │   ├── 📁 layout/
+│       │   │   ├── 📄 HeroSection.jsx
+│       │   │   └── 📄 ServicesGrid.jsx
+│       │   │
+│       │   └── 📁 forms/
+│       │       ├── 📄 ContactForm.jsx
+│       │       └── 📄 ApplicationForm.jsx
+│       │
+│       ├── 📁 pages/
+│       │   ├── 📄 HomePage.jsx
+│       │   ├── 📄 ServicesPage.jsx
+│       │   ├── 📄 ServiceDetailPage.jsx
+│       │   ├── 📄 BlogPage.jsx
+│       │   ├── 📄 BlogPostPage.jsx
+│       │   ├── 📄 AboutPage.jsx
+│       │   ├── 📄 ContactPage.jsx
+│       │   ├── 📄 ApplyPage.jsx
+│       │   ├── 📄 PortfolioPage.jsx
+│       │   ├── 📄 TeamPage.jsx
+│       │   ├── 📄 FAQPage.jsx
+│       │   ├── 📄 PrivacyPage.jsx
+│       │   ├── 📄 TermsPage.jsx
+│       │   └── 📄 NotFoundPage.jsx
+│       │
+│       ├── 📁 services/
+│       │   ├── 📄 api.js
+│       │   ├── 📄 contentService.js
+│       │   └── 📄 submissionService.js
+│       │
+│       ├── 📁 hooks/
+│       │   └── (empty for now - for custom hooks)
+│       │
+│       ├── 📁 context/
+│       │   └── (empty for now - for context providers)
+│       │
+│       └── 📁 utils/
+│           └── (empty for now - for utility functions)
+│
+├── 📁 database/
+│   ├── 📄 Create-DatabaseSchema.sql
+│   └── 📄 CreateJRLogin_Manual.sql
+│
+└── 📄 README.md

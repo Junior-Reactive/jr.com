@@ -1,0 +1,27 @@
+{
+  "name": "jr-website-backend",
+  "version": "1.0.0",
+  "description": "Junior Reactive Website Backend",
+  "main": "server-fixed.js",
+  "scripts": {
+    "start": "node server-fixed.js",
+    "dev": "nodemon server-fixed.js",
+    "db:create": "node create-full-schema.js",
+    "db:test": "node test-connection.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mssql": "^9.1.1",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.10.0",
+    "express-validator": "^7.0.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
+    "nodemailer": "^6.9.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
