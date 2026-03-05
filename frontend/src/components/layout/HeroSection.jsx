@@ -1,32 +1,39 @@
 import React from 'react';
-import Button from '../common/Button';
+import { Link } from 'react-router-dom';
 
-const HeroSection = ({ title, subtitle, primaryBtnText, primaryBtnLink, secondaryBtnText, secondaryBtnLink }) => {
+const HeroSection = ({
+    badge,
+    title,
+    subtitle,
+    primaryBtnText,
+    primaryBtnLink,
+    secondaryBtnText,
+    secondaryBtnLink,
+    children,
+}) => {
     return (
         <section className="hero">
             <div className="container">
+                {badge && (
+                    <div className="hero-badge">{badge}</div>
+                )}
                 <h1>{title}</h1>
-                <p>{subtitle}</p>
+                {subtitle && <p className="hero-sub">{subtitle}</p>}
                 {(primaryBtnText || secondaryBtnText) && (
                     <div className="hero-btns">
-                        {primaryBtnText && (
-                            <Button
-                                onClick={() => window.location.href = primaryBtnLink}
-                                style={{ marginRight: '15px' }}
-                            >
+                        {primaryBtnText && primaryBtnLink && (
+                            <Link to={primaryBtnLink} className="btn">
                                 {primaryBtnText}
-                            </Button>
+                            </Link>
                         )}
-                        {secondaryBtnText && (
-                            <Button
-                                variant="outline"
-                                onClick={() => window.location.href = secondaryBtnLink}
-                            >
+                        {secondaryBtnText && secondaryBtnLink && (
+                            <Link to={secondaryBtnLink} className="btn btn-outline">
                                 {secondaryBtnText}
-                            </Button>
+                            </Link>
                         )}
                     </div>
                 )}
+                {children}
             </div>
         </section>
     );

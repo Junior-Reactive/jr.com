@@ -2,55 +2,133 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import HeroSection from '../components/layout/HeroSection';
 
-const AboutPage = () => {
-    return (
-        <main>
-            <HeroSection
-                title="About Us"
-                subtitle="Building the future with intelligence and integrity."
-            />
+const VALUES = [
+    { icon: '💡', title: 'Innovation', desc: 'Constantly pushing the boundaries of what technology can do for your business.' },
+    { icon: '🤝', title: 'Integrity', desc: 'Transparent, honest relationships with every client — always.' },
+    { icon: '🏆', title: 'Excellence', desc: 'We hold every deliverable to the highest professional standard.' },
+    { icon: '🌱', title: 'Growth', desc: 'We grow with our clients, adapting and evolving as their needs change.' },
+];
 
-            <section className="section">
-                <div className="container">
-                    <h2>Our Story</h2>
-                    <p>Founded by Pharrell Aaron Mugumya, Junior Reactive started with a simple mission: to make Artificial Intelligence accessible and effective for businesses of all sizes. We believe that technology should serve people, not the other way around.</p>
+const AboutPage = () => (
+    <main>
+        <HeroSection
+            badge="Our Story"
+            title="About Junior Reactive"
+            subtitle="Building the future with intelligence, integrity, and an African perspective."
+            primaryBtnText="Meet the Team"
+            primaryBtnLink="/team"
+        />
 
-                    <h2>Our Values</h2>
-                    <ul style={{ listStyle: 'disc', marginLeft: 20, marginBottom: 20 }}>
-                        <li><strong>Innovation:</strong> Constantly pushing boundaries.</li>
-                        <li><strong>Integrity:</strong> Honest and transparent dealings.</li>
-                        <li><strong>Excellence:</strong> Delivering nothing but the best.</li>
-                    </ul>
-
-                    <h2>Why Choose Us?</h2>
-                    <p>We combine deep technical expertise with strategic business acumen. Our team doesn't just write code; we solve problems. From the initial consultation to final deployment, we are your partners in growth.</p>
-                </div>
-            </section>
-
-            <section className="section" style={{ backgroundColor: 'var(--color-white)' }}>
-                <div className="container">
-                    <h2>Meet the Founder</h2>
-                    <div className="card" style={{ maxWidth: 400, textAlign: 'center' }}>
-                        <img
-                            src="/images/team/Pharrell.jpeg"
-                            alt="Pharrell Aaron Mugumya"
-                            style={{
-                                width: '100%',
-                                borderRadius: '8px',
-                                marginBottom: '15px'
-                            }}
-                        />
-                        <h3>Pharrell Aaron Mugumya</h3>
-                        <p><strong>Founder & CEO</strong></p>
-                        <p>Passionate about leveraging AI to create meaningful impact.</p>
+        {/* Mission */}
+        <section className="section">
+            <div className="container">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }}>
+                    <div>
+                        <div className="section-label">Who We Are</div>
+                        <h2 style={{ marginTop: 12 }}>Our Story</h2>
+                        <p>
+                            Founded by Pharrell Aaron Mugumya, Junior Reactive started with a simple but powerful mission: to make Artificial Intelligence accessible and effective for businesses of all sizes across East Africa and beyond.
+                        </p>
+                        <p>
+                            We believe that technology should serve people — not the other way around. Every solution we build is grounded in real-world business needs, not theoretical frameworks.
+                        </p>
+                        <p>
+                            From solo entrepreneurs to established organisations, we've helped clients harness the power of AI, data, and custom software to solve real problems and seize new opportunities.
+                        </p>
                     </div>
-                    <div style={{ marginTop: 20 }}>
-                        <Link to="/team" className="btn btn-outline">View Full Team</Link>
+                    <div style={{
+                        background: 'var(--gradient-primary)',
+                        borderRadius: 'var(--radius-xl)',
+                        height: 380,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
+                        gap: 16,
+                        color: 'white',
+                        textAlign: 'center',
+                        padding: 40,
+                        position: 'relative',
+                        overflow: 'hidden',
+                    }}>
+                        <div style={{ fontSize: '4rem', marginBottom: 8 }}>🌍</div>
+                        <h3 style={{ color: 'white', margin: 0, fontFamily: 'var(--font-display)' }}>Built in Uganda,</h3>
+                        <h3 style={{ color: 'rgba(255,255,255,.7)', margin: 0, fontFamily: 'var(--font-display)' }}>Built for the World</h3>
+                        <p style={{ color: 'rgba(255,255,255,.7)', margin: '12px 0 0', fontSize: '0.9rem' }}>
+                            Proudly headquartered in Kampala — delivering global-quality solutions.
+                        </p>
                     </div>
                 </div>
-            </section>
-        </main>
-    );
-};
+            </div>
+        </section>
+
+        {/* Values */}
+        <section className="section" style={{ background: 'var(--color-white)' }}>
+            <div className="container">
+                <div className="section-header">
+                    <div className="section-label">What We Stand For</div>
+                    <h2 className="section-title">Our Values</h2>
+                </div>
+                <div className="services-grid">
+                    {VALUES.map((v) => (
+                        <div className="card" key={v.title}>
+                            <div className="card-icon">{v.icon}</div>
+                            <h3>{v.title}</h3>
+                            <p style={{ fontSize: '0.9rem' }}>{v.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* Founder */}
+        <section className="section">
+            <div className="container">
+                <div className="section-header">
+                    <div className="section-label">Leadership</div>
+                    <h2 className="section-title">Meet the Founder</h2>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div className="team-card" style={{ maxWidth: 360, width: '100%' }}>
+                        <div className="team-img-wrap">
+                            <img
+                                src="/images/team/Pharrell.jpeg"
+                                alt="Pharrell Aaron Mugumya"
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.parentElement.style.display = 'flex';
+                                    e.target.parentElement.style.alignItems = 'center';
+                                    e.target.parentElement.style.justifyContent = 'center';
+                                    e.target.parentElement.innerHTML = '<span style="font-size:4rem">👤</span>';
+                                }}
+                            />
+                        </div>
+                        <div className="team-card-body">
+                            <h3 style={{ marginBottom: 4 }}>Pharrell Aaron Mugumya</h3>
+                            <p className="position">Founder & CEO</p>
+                            <p style={{ fontSize: '0.875rem' }}>
+                                Passionate technologist dedicated to leveraging AI and software to create meaningful impact across African businesses.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div style={{ textAlign: 'center', marginTop: 32 }}>
+                    <Link to="/team" className="btn btn-outline">View Full Team</Link>
+                </div>
+            </div>
+        </section>
+
+        {/* CTA */}
+        <section className="section">
+            <div className="container">
+                <div className="cta-band">
+                    <h2>Ready to Work Together?</h2>
+                    <p>Let's build something exceptional.</p>
+                    <Link to="/apply" className="btn">Apply for Services</Link>
+                </div>
+            </div>
+        </section>
+    </main>
+);
 
 export default AboutPage;

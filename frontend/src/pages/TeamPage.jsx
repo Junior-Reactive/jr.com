@@ -2,106 +2,115 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { contentService } from '../services/contentService';
 import HeroSection from '../components/layout/HeroSection';
+import { SkeletonGrid, SkeletonTeamCard } from '../components/common/SkeletonLoader';
+import ErrorState from '../components/common/ErrorState';
+
+// Generate a deterministic gradient and initials avatar for each team member
+const AVATAR_GRADIENTS = [
+    ['#1c265e','#5269c3'],
+    ['#5269c3','#90a0da'],
+    ['#2d3d8a','#a8ccee'],
+    ['#1c265e','#7b91d4'],
+    ['#3b4f9e','#90a0da'],
+    ['#1c265e','#5269c3'],
+];
+
+function getInitials(name = '') {
+    return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+}
+
+const MemberAvatar = ({ member, index }) => {
+    const [imgFailed, setImgFailed] = React.useState(false);
+    const [g1, g2] = AVATAR_GRADIENTS[index % AVATAR_GRADIENTS.length];
+    const initials = getInitials(member.name);
+
+    if (member.image && !imgFailed) {
+        return (
+            <div className="team-img-wrap">
+                <img
+                    src={`/images/team/${member.image}`}
+                    alt={member.name}
+                    onError={() => setImgFailed(true)}
+                />
+            </div>
+        );
+    }
+
+    // Beautiful gradient avatar with initials
+    return (
+        <div className="team-img-wrap" style={{ background: `linear-gradient(135deg, ${g1} 0%, ${g2} 100%)` }}>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                gap: 8,
+            }}>
+                <span style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 800,
+                    fontSize: '2.8rem',
+                    color: 'rgba(255,255,255,.9)',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1,
+                }}>
+                    {initials}
+                </span>
+                <span style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    color: 'rgba(255,255,255,.6)',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                }}>
+                    {member.position.split(' ')[0]}
+                </span>
+            </div>
+        </div>
+    );
+};
 
 const TeamPage = () => {
-    const { data, isLoading, error, refetch } = useQuery({
+    const { data, isLoading, isError, refetch, error } = useQuery({
         queryKey: ['team'],
         queryFn: () => contentService.getTeamMembers(),
+        retry: 2,
     });
 
-    const members = data?.data?.data || [];
-
-    if (isLoading) {
-        return (
-            <main>
-                <HeroSection
-                    title="Our Team"
-                    subtitle="The minds behind Junior Reactive."
-                />
-                <section className="section">
-                    <div className="container" style={{ textAlign: 'center' }}>
-                        <div className="loading-spinner"></div>
-                        <p>Loading team members...</p>
-                        <p style={{ color: 'var(--color-accent-1)', fontSize: '0.9rem', marginTop: '10px' }}>
-                            If this takes too long, check that the backend is running at {process.env.REACT_APP_API_URL}
-                        </p>
-                    </div>
-                </section>
-            </main>
-        );
-    }
-
-    if (error) {
-        return (
-            <main>
-                <HeroSection
-                    title="Our Team"
-                    subtitle="The minds behind Junior Reactive."
-                />
-                <section className="section">
-                    <div className="container" style={{ textAlign: 'center' }}>
-                        <div style={{ 
-                            backgroundColor: '#f8d7da', 
-                            color: '#721c24', 
-                            padding: '20px', 
-                            borderRadius: '8px',
-                            marginBottom: '20px'
-                        }}>
-                            <h3>⚠️ Error Loading Team</h3>
-                            <p>{error.message || 'Could not connect to the server'}</p>
-                            <p>Please ensure the backend is running at: {process.env.REACT_APP_API_URL}</p>
-                            <button 
-                                onClick={() => refetch()} 
-                                className="btn"
-                                style={{ marginTop: '15px' }}
-                            >
-                                Try Again
-                            </button>
-                        </div>
-                    </div>
-                </section>
-            </main>
-        );
-    }
+    const members = data?.data?.data || data?.data || [];
 
     return (
         <main>
             <HeroSection
+                badge="The People"
                 title="Our Team"
-                subtitle="The minds behind Junior Reactive."
+                subtitle="The minds and talent behind every solution we deliver."
             />
 
             <section className="section">
                 <div className="container">
-                    {members.length === 0 ? (
-                        <p style={{ textAlign: 'center' }}>No team members found.</p>
+                    {isLoading ? (
+                        <SkeletonGrid count={6} Card={SkeletonTeamCard} />
+                    ) : isError ? (
+                        <ErrorState
+                            title="Couldn't load team members"
+                            message={error?.userMessage || 'Make sure the backend is running on port 5005.'}
+                            onRetry={refetch}
+                        />
+                    ) : members.length === 0 ? (
+                        <ErrorState icon="👤" title="No team members yet" message="Team profiles will appear here once added to the database." />
                     ) : (
                         <div className="services-grid">
-                            {members.map(member => (
-                                <div key={member.id} className="card">
-                                    <div style={{ 
-                                        height: 200, 
-                                        backgroundColor: 'var(--color-light)', 
-                                        marginBottom: 15,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        borderRadius: '8px',
-                                        overflow: 'hidden'
-                                    }}>
-                                        {member.image ? (
-                                            <img 
-                                                src={`/images/team/${member.image}`} 
-                                                alt={member.name}
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            />
-                                        ) : (
-                                            <span style={{ color: 'var(--color-accent-1)' }}>No Image</span>
-                                        )}
+                            {members.map((member, i) => (
+                                <div key={member.id} className="team-card">
+                                    <MemberAvatar member={member} index={i} />
+                                    <div className="team-card-body">
+                                        <h3 style={{ marginBottom: 4 }}>{member.name}</h3>
+                                        <p className="position">{member.position}</p>
+                                        <p style={{ fontSize: '0.875rem' }}>{member.bio}</p>
                                     </div>
-                                    <h3>{member.name}</h3>
-                                    <p style={{ color: 'var(--color-secondary)' }}>{member.position}</p>
-                                    <p>{member.bio}</p>
                                 </div>
                             ))}
                         </div>

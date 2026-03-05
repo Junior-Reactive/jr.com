@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { contentService } from '../services/contentService';
 import HeroSection from '../components/layout/HeroSection';
+import { SkeletonBlogCard, SkeletonGrid } from '../components/common/SkeletonLoader';
+import ErrorState from '../components/common/ErrorState';
 
 const BlogPage = () => {
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, isError, refetch } = useQuery({
         queryKey: ['blog'],
         queryFn: () => contentService.getBlogPosts(),
     });
@@ -15,28 +17,60 @@ const BlogPage = () => {
     return (
         <main>
             <HeroSection
+                badge="Latest Insights"
                 title="Blog & Insights"
-                subtitle="Latest news, trends, and thoughts from the Junior Reactive team."
+                subtitle="News, trends, and thoughts on AI, technology, and business from the Junior Reactive team."
             />
 
             <section className="section">
                 <div className="container">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 30 }}>
-                        {isLoading ? (
-                            <p>Loading posts...</p>
-                        ) : (
-                            posts.map(post => (
-                                <div key={post.id} className="card">
-                                    <div style={{ color: 'var(--color-accent-1)', marginBottom: 10, fontSize: '0.9rem' }}>
-                                        {post.formattedDate} | {post.author}
+                    {isLoading ? (
+                        <SkeletonGrid count={6} Card={SkeletonBlogCard} />
+                    ) : isError ? (
+                        <ErrorState
+                            title="Couldn't load posts"
+                            message="Make sure the backend is running on port 5005."
+                            onRetry={refetch}
+                        />
+                    ) : posts.length === 0 ? (
+                        <ErrorState
+                            icon="📝"
+                            title="No posts yet"
+                            message="Blog posts will appear here once published."
+                        />
+                    ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+                            {posts.map((post) => (
+                                <article key={post.id} className="blog-card">
+                                    {/* Placeholder header image */}
+                                    <div style={{
+                                        height: 160,
+                                        background: 'var(--gradient-primary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '3rem',
+                                    }}>
+                                        📰
                                     </div>
-                                    <h3><Link to={`/blog/${post.slug}`}>{post.title}</Link></h3>
-                                    <p>{post.excerpt}</p>
-                                    <Link to={`/blog/${post.slug}`} style={{ color: 'var(--color-secondary)' }}>Read More &rarr;</Link>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                                    <div className="blog-card-body">
+                                        <div className="blog-meta">
+                                            <span>{post.formattedDate}</span>
+                                            <span>·</span>
+                                            <span>{post.author}</span>
+                                        </div>
+                                        <h3>
+                                            <Link to={`/blog/${post.slug}`}>{post.title}</Link>
+                                        </h3>
+                                        <p>{post.excerpt}</p>
+                                        <Link to={`/blog/${post.slug}`} className="read-more">
+                                            Read More →
+                                        </Link>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
         </main>

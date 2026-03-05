@@ -1,0 +1,4780 @@
+====================================================
+JUNIOR REACTIVE PROJECT - OPTIMIZED DUMP
+Generated: 03/05/2026 10:15:29
+Total files in project (including node_modules): 50,011
+====================================================
+
+====================================================
+FOLDER STRUCTURE (node_modules excluded)
+====================================================
++-- backend\
+    +-- config\
+        +-- db.js
+        +-- env.js
+    +-- controllers\
+        +-- contentController.js
+        +-- submissionController.js
+    +-- middleware\
+        +-- errorHandler.js
+        +-- validation.js
+    +-- models\
+        +-- applicationModel.js
+        +-- blogModel.js
+        +-- contactModel.js
+        +-- email.js
+        +-- portfolioModel.js
+        +-- serviceModel.js
+    +-- routes\
+        +-- contentRoutes.js
+        +-- submissionRoutes.js
+    +-- scripts\
+        +-- migrate-xml.js
+    +-- utils\
+        +-- email.js
+    +-- .env
+    +-- .env.example
+    +-- package-lock.json
+    +-- package.json
+    +-- server-fixed.js
+    +-- server.js
++-- frontend\
+    +-- public\
+        +-- images\
+            +-- team\
+                +-- Pharrell.jpeg
+        +-- favicon.ico
+        +-- index.html
+        +-- logo.png
+        +-- logo192.png
+        +-- logo512.png
+        +-- manifest.json
+    +-- src\
+        +-- __tests__\
+            +-- components\
+                +-- common\
+                    +-- Button.test.jsx
+                    +-- Card.test.jsx
+                    +-- Footer.test.jsx
+                    +-- Header.test.jsx
+                +-- forms\
+                    +-- ApplicationForm.test.jsx
+                    +-- ContactForm.test.jsx
+            +-- pages\
+                +-- HomePage.test.jsx
+            +-- services\
+                +-- api.test.js
+                +-- contentService.test.js
+                +-- submissionService.test.js
+        +-- assets\
+            +-- css\
+                +-- global.css
+                +-- variables.css
+            +-- images\
+        +-- components\
+            +-- common\
+                +-- Button.css
+                +-- Button.jsx
+                +-- Card.jsx
+                +-- Chatbot.css
+                +-- Chatbot.jsx
+                +-- Footer.jsx
+                +-- Header.css
+                +-- Header.jsx
+            +-- forms\
+                +-- ApplicationForm.jsx
+                +-- ContactForm.jsx
+            +-- layout\
+                +-- HeroSection.jsx
+                +-- ServicesGrid.jsx
+        +-- context\
+        +-- hooks\
+        +-- pages\
+            +-- AboutPage.jsx
+            +-- ApplyPage.jsx
+            +-- BlogPage.jsx
+            +-- BlogPostPage.jsx
+            +-- ContactPage.jsx
+            +-- FAQPage.jsx
+            +-- HomePage.jsx
+            +-- NotFoundPage.jsx
+            +-- PortfolioPage.jsx
+            +-- PrivacyPage.jsx
+            +-- ServiceDetailPage.jsx
+            +-- ServicesPage.jsx
+            +-- TeamPage.jsx
+            +-- TermsPage.jsx
+        +-- services\
+            +-- api.js
+            +-- contentService.js
+            +-- submissionService.js
+        +-- utils\
+        +-- App.js
+        +-- index.js
+    +-- .env
+    +-- .env.example
+    +-- package-lock.json
+    +-- package.json
++-- logs\
+    +-- startup.log
++-- .gitignore
++-- $logFile
++-- generate.ps1
++-- LICENSE
++-- project_dump_optimized.txt
++-- project_dump.txt
++-- quick_dump.txt
++-- README.md
++-- Start.bat
++-- structure.txt
+
+====================================================
+FILE: backend\config\db.js
+====================================================
+const sql = require('mssql');
+
+const config = {
+    user: process.env.DB_USER || 'JR',
+    password: process.env.DB_PASSWORD || '0000',
+    server: process.env.DB_SERVER || 'localhost',
+    database: process.env.DB_DATABASE || 'JRWebsite',
+    options: {
+        encrypt: false,
+        trustServerCertificate: true,
+        enableArithAbort: true
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+};
+
+let pool = null;
+
+async function connectDB() {
+    try {
+        pool = await sql.connect(config);
+        console.log('✅ Connected to Microsoft SQL Server');
+        return pool;
+    } catch (err) {
+        console.error('❌ Database connection failed:', err);
+        process.exit(1);
+    }
+}
+
+function getPool() {
+    if (!pool) {
+        throw new Error('Database not connected. Call connectDB first.');
+    }
+    return pool;
+}
+
+module.exports = { sql, connectDB, getPool };
+
+====================================================
+FILE: backend\config\env.js
+====================================================
+const dotenv = require('dotenv');
+dotenv.config();
+
+const requiredEnv = ['DB_USER', 'DB_PASSWORD', 'DB_SERVER', 'DB_DATABASE'];
+const missing = requiredEnv.filter(key => !process.env[key]);
+
+if (missing.length) {
+    console.error(`Missing required environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+}
+
+module.exports = {
+    port: process.env.PORT || 5000,
+    db: {
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        server: process.env.DB_SERVER,
+        database: process.env.DB_DATABASE,
+    },
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+};
+
+====================================================
+FILE: backend\controllers\contentController.js
+====================================================
+const serviceModel = require('../models/serviceModel');
+const blogModel = require('../models/blogModel');
+const portfolioModel = require('../models/portfolioModel');
+
+async function getServices(req, res, next) {
+    try {
+        const services = await serviceModel.getAllServices();
+        res.json({ success: true, data: services });
+    } catch (err) {
+        next(err);
+    }
+}
+
+async function getServiceById(req, res, next) {
+    try {
+        const service = await serviceModel.getServiceById(req.params.id);
+        if (!service) {
+            return res.status(404).json({ success: false, error: 'Service not found' });
+        }
+        res.json({ success: true, data: service });
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { getServices, getServiceById };
+
+====================================================
+FILE: backend\controllers\submissionController.js
+====================================================
+const contactModel = require('../models/contactModel');
+const applicationModel = require('../models/applicationModel');
+
+async function submitContact(req, res, next) {
+    try {
+        const submissionId = await contactModel.createContactSubmission(req.body);
+        res.status(201).json({ 
+            success: true, 
+            message: 'Contact form submitted successfully',
+            id: submissionId 
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+async function submitApplication(req, res, next) {
+    try {
+        const submissionId = await applicationModel.createApplicationSubmission(req.body);
+        res.status(201).json({ 
+            success: true, 
+            message: 'Application submitted successfully',
+            id: submissionId 
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { submitContact, submitApplication };
+
+====================================================
+FILE: backend\middleware\errorHandler.js
+====================================================
+const errorHandler = (err, req, res, next) => {
+    console.error(err.stack);
+
+    let error = { ...err };
+    error.message = err.message;
+
+    if (err.name === 'ConnectionError' || err.name === 'RequestError') {
+        error.message = 'Database error occurred';
+        error.statusCode = 500;
+    }
+
+    res.status(error.statusCode || 500).json({
+        success: false,
+        error: error.message || 'Server Error'
+    });
+};
+
+module.exports = errorHandler;
+
+====================================================
+FILE: backend\middleware\validation.js
+====================================================
+const { body, validationResult } = require('express-validator');
+
+// Contact form validation rules
+const validateContact = [
+    body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 100 }),
+    body('email').trim().notEmpty().withMessage('Email is required').isEmail().normalizeEmail(),
+    body('subject').trim().notEmpty().withMessage('Subject is required').isLength({ max: 200 }),
+    body('message').trim().notEmpty().withMessage('Message is required').isLength({ max: 5000 }),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    }
+];
+
+// Application form validation rules
+const validateApplication = [
+    body('company').optional().trim().isLength({ max: 100 }),
+    body('name').trim().notEmpty().withMessage('Contact person name is required').isLength({ max: 100 }),
+    body('email').trim().notEmpty().withMessage('Email is required').isEmail().normalizeEmail(),
+    body('phone').optional().trim().isLength({ max: 50 }),
+    body('service_type').trim().notEmpty().withMessage('Service type is required'),
+    body('requirements').trim().notEmpty().withMessage('Requirements are required').isLength({ max: 10000 }),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    }
+];
+
+module.exports = { validateContact, validateApplication };
+
+====================================================
+FILE: backend\models\applicationModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function createApplicationSubmission(data) {
+    const pool = getPool();
+    const result = await pool.request()
+        .input('company', data.company)
+        .input('name', data.name)
+        .input('email', data.email)
+        .input('phone', data.phone)
+        .input('service_type', data.service_type)
+        .input('requirements', data.requirements)
+        .query(`
+            INSERT INTO ServiceApplications (Company, ContactPerson, Email, Phone, ServiceType, Requirements)
+            OUTPUT INSERTED.ApplicationID AS id
+            VALUES (@company, @name, @email, @phone, @service_type, @requirements);
+        `);
+    return result.recordset[0].id;
+}
+
+module.exports = { createApplicationSubmission };
+
+====================================================
+FILE: backend\models\blogModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function getAllPosts() {
+    const pool = getPool();
+    const result = await pool.request()
+        .query('SELECT PostID, Slug, Title, Excerpt, Author, PublishDate FROM BlogPosts ORDER BY PublishDate DESC');
+    return result.recordset;
+}
+
+async function getPostBySlug(slug) {
+    const pool = getPool();
+    const result = await pool.request()
+        .input('slug', slug)
+        .query('SELECT * FROM BlogPosts WHERE Slug = @slug');
+    return result.recordset[0];
+}
+
+module.exports = { getAllPosts, getPostBySlug };
+
+====================================================
+FILE: backend\models\contactModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function createContactSubmission(data) {
+    const pool = getPool();
+    const result = await pool.request()
+        .input('name', data.name)
+        .input('email', data.email)
+        .input('subject', data.subject)
+        .input('message', data.message)
+        .query(`
+            INSERT INTO ContactSubmissions (FullName, Email, Subject, Message)
+            OUTPUT INSERTED.SubmissionID AS id
+            VALUES (@name, @email, @subject, @message);
+        `);
+    return result.recordset[0].id;
+}
+
+module.exports = { createContactSubmission };
+
+====================================================
+FILE: backend\models\email.js
+====================================================
+const nodemailer = require('nodemailer');
+
+async function sendContactNotification(data) {
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    const mailOptions = {
+        from: `"Junior Reactive" <${process.env.EMAIL_USER}>`,
+        to: 'juniorreactive@gmail.com',
+        subject: `New Contact: ${data.subject}`,
+        html: `
+            <h3>New Contact Form Submission</h3>
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Subject:</strong> ${data.subject}</p>
+            <p><strong>Message:</strong></p>
+            <p>${data.message}</p>
+        `
+    };
+
+    await transporter.sendMail(mailOptions);
+}
+
+module.exports = { sendContactNotification };
+
+====================================================
+FILE: backend\models\portfolioModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function getAllProjects() {
+    const pool = getPool();
+    const result = await pool.request()
+        .query('SELECT ProjectID, Slug, Title, Category, Description, ImageFileName FROM PortfolioProjects ORDER BY ProjectID');
+    return result.recordset;
+}
+
+module.exports = { getAllProjects };
+
+====================================================
+FILE: backend\models\serviceModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function getAllProjects() {
+    const pool = getPool();
+    const result = await pool.request()
+        .query('SELECT ProjectID, Slug, Title, Category, Description, ImageFileName FROM PortfolioProjects ORDER BY ProjectID');
+    return result.recordset;
+}
+
+module.exports = { getAllProjects };
+
+====================================================
+FILE: backend\routes\contentRoutes.js
+====================================================
+const express = require('express');
+const router = express.Router();
+const contentController = require('../controllers/contentController');
+
+router.get('/services', contentController.getServices);
+router.get('/services/:id', contentController.getServiceById);
+// Add more routes for blog, portfolio etc.
+
+module.exports = router;
+
+====================================================
+FILE: backend\routes\submissionRoutes.js
+====================================================
+const express = require('express');
+const router = express.Router();
+const submissionController = require('../controllers/submissionController');
+const { validateContact, validateApplication } = require('../middleware/validation');
+
+router.post('/contact', validateContact, submissionController.submitContact);
+router.post('/apply', validateApplication, submissionController.submitApplication);
+
+module.exports = router;
+
+====================================================
+FILE: backend\scripts\migrate-xml.js
+====================================================
+// Placeholder for XML migration script
+console.log('Migration script ready. Implement based on your XML structure.');
+
+====================================================
+FILE: backend\utils\email.js
+====================================================
+const nodemailer = require('nodemailer');
+
+async function sendContactNotification(data) {
+    // Configure your email transporter
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    // Implementation for sending email
+    // This is a placeholder
+    console.log('Email notification would be sent:', data);
+}
+
+module.exports = { sendContactNotification };
+
+
+====================================================
+FILE: backend\server-fixed.js
+====================================================
+const express = require("express");
+const sql = require("mssql");
+const cors = require("cors");
+const helmet = require("helmet");
+const dotenv = require("dotenv");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
+dotenv.config();
+
+const app = express();
+const PORT = 5005; // Fixed to port 5005
+
+// Allowed origins for CORS
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://juniorreactive.com",
+    "https://www.juniorreactive.com"
+];
+
+// Middleware
+app.use(helmet());
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Database configuration
+const dbConfig = {
+    user: process.env.DB_USER || "JR",
+    password: process.env.DB_PASSWORD || "0000",
+    server: process.env.DB_SERVER || "localhost",
+    database: process.env.DB_DATABASE || "JRWebsite",
+    options: {
+        encrypt: false,
+        trustServerCertificate: true,
+        enableArithAbort: true
+    }
+};
+
+// Swagger configuration
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Junior Reactive API",
+            version: "1.0.0",
+            description: "RESTful API for Junior Reactive - AI and IT Solutions Provider",
+            contact: {
+                name: "Junior Reactive",
+                email: "juniorreactive@gmail.com"
+            }
+        },
+        servers: [
+            { url: "http://localhost:5005", description: "Development Server" },
+            { url: "https://api.juniorreactive.com", description: "Production Server" }
+        ],
+        tags: [
+            { name: "Health" },
+            { name: "Services" },
+            { name: "Blog" },
+            { name: "Portfolio" },
+            { name: "Team" },
+            { name: "FAQs" },
+            { name: "Contact" },
+            { name: "Applications" }
+        ],
+        components: {
+            schemas: {
+                Service: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer" },
+                        key: { type: "string" },
+                        title: { type: "string" },
+                        shortDescription: { type: "string" },
+                        fullDescription: { type: "string" },
+                        icon: { type: "string" }
+                    }
+                },
+                BlogPost: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer" },
+                        slug: { type: "string" },
+                        title: { type: "string" },
+                        excerpt: { type: "string" },
+                        content: { type: "string" },
+                        author: { type: "string" },
+                        publishDate: { type: "string", format: "date" },
+                        formattedDate: { type: "string" }
+                    }
+                },
+                PortfolioProject: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer" },
+                        slug: { type: "string" },
+                        title: { type: "string" },
+                        category: { type: "string" },
+                        description: { type: "string" },
+                        image: { type: "string" }
+                    }
+                },
+                TeamMember: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer" },
+                        name: { type: "string" },
+                        position: { type: "string" },
+                        bio: { type: "string" },
+                        image: { type: "string" }
+                    }
+                },
+                FAQ: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer" },
+                        question: { type: "string" },
+                        answer: { type: "string" }
+                    }
+                },
+                ContactSubmission: {
+                    type: "object",
+                    required: ["name", "email", "subject", "message"],
+                    properties: {
+                        name: { type: "string" },
+                        email: { type: "string", format: "email" },
+                        subject: { type: "string" },
+                        message: { type: "string" }
+                    }
+                },
+                ApplicationSubmission: {
+                    type: "object",
+                    required: ["name", "email", "service_type", "requirements"],
+                    properties: {
+                        company: { type: "string" },
+                        name: { type: "string" },
+                        email: { type: "string", format: "email" },
+                        phone: { type: "string" },
+                        service_type: { type: "string" },
+                        requirements: { type: "string" }
+                    }
+                }
+            }
+        }
+    },
+    apis: [__filename],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: "Junior Reactive API Documentation"
+}));
+
+// Serve JSON version of Swagger spec
+app.get("/api-docs.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(swaggerSpec);
+});
+
+// Database connection pool
+let pool;
+async function getPool() {
+    if (!pool) {
+        pool = await sql.connect(dbConfig);
+    }
+    return pool;
+}
+
+// Health endpoint
+app.get("/api/health", async (req, res) => {
+    try {
+        const pool = await getPool();
+        await pool.request().query("SELECT 1");
+        res.json({ 
+            status: "OK", 
+            message: "Server is running",
+            database: "Connected",
+            timestamp: new Date().toISOString()
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            status: "Error", 
+            message: "Database connection failed",
+            error: err.message 
+        });
+    }
+});
+
+// Services
+app.get("/api/services", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                ServiceID as id,
+                ServiceKey as key,
+                Title as title,
+                ShortDescription as shortDescription,
+                Icon as icon
+            FROM Services 
+            ORDER BY ServiceID
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.get("/api/services/:id", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request()
+            .input("id", sql.NVarChar, req.params.id)
+            .query(`
+                SELECT 
+                    ServiceID as id,
+                    ServiceKey as key,
+                    Title as title,
+                    ShortDescription as shortDescription,
+                    FullDescription as fullDescription,
+                    Icon as icon
+                FROM Services 
+                WHERE ServiceKey = @id OR ServiceID = @id
+            `);
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, error: "Service not found" });
+        }
+        res.json({ success: true, data: result.recordset[0] });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Blog
+app.get("/api/blog", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                PostID as id,
+                Slug as slug,
+                Title as title,
+                Excerpt as excerpt,
+                Author as author,
+                PublishDate as publishDate,
+                FORMAT(PublishDate, 'MMMM dd, yyyy') as formattedDate
+            FROM BlogPosts 
+            ORDER BY PublishDate DESC
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.get("/api/blog/:slug", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request()
+            .input("slug", sql.NVarChar, req.params.slug)
+            .query(`
+                SELECT 
+                    PostID as id,
+                    Slug as slug,
+                    Title as title,
+                    Excerpt as excerpt,
+                    Content as content,
+                    Author as author,
+                    PublishDate as publishDate,
+                    FORMAT(PublishDate, 'MMMM dd, yyyy') as formattedDate
+                FROM BlogPosts 
+                WHERE Slug = @slug
+            `);
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, error: "Blog post not found" });
+        }
+        res.json({ success: true, data: result.recordset[0] });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Portfolio
+app.get("/api/portfolio", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                ProjectID as id,
+                Slug as slug,
+                Title as title,
+                Category as category,
+                Description as description,
+                ImageFileName as image
+            FROM PortfolioProjects 
+            ORDER BY ProjectID
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Team
+app.get("/api/team", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                MemberID as id,
+                Name as name,
+                Position as position,
+                Bio as bio,
+                ImageFileName as image
+            FROM TeamMembers 
+            ORDER BY DisplayOrder
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// FAQs
+app.get("/api/faqs", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                FAQID as id,
+                Question as question,
+                Answer as answer
+            FROM FAQs 
+            ORDER BY DisplayOrder
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Contact form submission
+app.post("/api/contact", async (req, res) => {
+    try {
+        const { name, email, subject, message } = req.body;
+        
+        if (!name || !email || !subject || !message) {
+            return res.status(400).json({ 
+                success: false, 
+                error: "All fields are required" 
+            });
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid email format"
+            });
+        }
+        
+        const pool = await getPool();
+        const result = await pool.request()
+            .input("name", sql.NVarChar, name)
+            .input("email", sql.NVarChar, email)
+            .input("subject", sql.NVarChar, subject)
+            .input("message", sql.NVarChar, message)
+            .query(`
+                INSERT INTO ContactSubmissions (FullName, Email, Subject, Message)
+                OUTPUT INSERTED.SubmissionID as id
+                VALUES (@name, @email, @subject, @message)
+            `);
+        
+        res.status(201).json({ 
+            success: true, 
+            message: "Contact form submitted successfully",
+            id: result.recordset[0].id
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Application form submission
+app.post("/api/apply", async (req, res) => {
+    try {
+        const { company, name, email, phone, service_type, requirements } = req.body;
+        
+        if (!name || !email || !service_type || !requirements) {
+            return res.status(400).json({ 
+                success: false, 
+                error: "Name, email, service type, and requirements are required" 
+            });
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid email format"
+            });
+        }
+        
+        const pool = await getPool();
+        const result = await pool.request()
+            .input("company", sql.NVarChar, company || null)
+            .input("name", sql.NVarChar, name)
+            .input("email", sql.NVarChar, email)
+            .input("phone", sql.NVarChar, phone || null)
+            .input("service_type", sql.NVarChar, service_type)
+            .input("requirements", sql.NVarChar, requirements)
+            .query(`
+                INSERT INTO ServiceApplications (Company, ContactPerson, Email, Phone, ServiceType, Requirements)
+                OUTPUT INSERTED.ApplicationID as id
+                VALUES (@company, @name, @email, @phone, @service_type, @requirements)
+            `);
+        
+        res.status(201).json({ 
+            success: true, 
+            message: "Application submitted successfully",
+            id: result.recordset[0].id
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log("=".repeat(60));
+    console.log("🚀 JUNIOR REACTIVE API SERVER");
+    console.log("=".repeat(60));
+    console.log(`📡 Server:   http://localhost:${PORT}`);
+    console.log(`📚 Swagger:  http://localhost:${PORT}/api-docs`);
+    console.log("=".repeat(60));
+    console.log("\n📌 Available Endpoints:");
+    console.log("   GET  /api/health");
+    console.log("   GET  /api/services");
+    console.log("   GET  /api/services/:id");
+    console.log("   GET  /api/blog");
+    console.log("   GET  /api/blog/:slug");
+    console.log("   GET  /api/portfolio");
+    console.log("   GET  /api/team");
+    console.log("   GET  /api/faqs");
+    console.log("   POST /api/contact");
+    console.log("   POST /api/apply");
+    console.log("=".repeat(60));
+});
+
+// Handle cleanup on server shutdown
+process.on("SIGINT", async () => {
+    if (pool) {
+        await pool.close();
+        console.log("\nDatabase connection closed");
+    }
+    process.exit(0);
+});
+
+====================================================
+FILE: backend\server.js
+====================================================
+const express = require("express");
+const sql = require("mssql");
+const cors = require("cors");
+const helmet = require("helmet");
+const dotenv = require("dotenv");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(helmet());
+app.use(cors({
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    credentials: true
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Database configuration
+const dbConfig = {
+    user: "JR",
+    password: "0000",
+    server: "localhost",
+    database: "JRWebsite",
+    options: {
+        encrypt: false,
+        trustServerCertificate: true,
+        enableArithAbort: true
+    }
+};
+
+// ============ SWAGGER CONFIGURATION ============
+
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Junior Reactive API",
+            version: "1.0.0",
+            description: "RESTful API for Junior Reactive - AI and IT Solutions Provider",
+            contact: {
+                name: "Junior Reactive",
+                email: "juniorreactive@gmail.com",
+                url: "http://localhost:5000"
+            },
+            license: {
+                name: "Private",
+                url: "https://juniorreactive.com"
+            }
+        },
+        servers: [
+            {
+                url: "http://localhost:5000",
+                description: "Development Server"
+            },
+            {
+                url: "https://api.juniorreactive.com",
+                description: "Production Server"
+            }
+        ],
+        tags: [
+            { name: "Health", description: "API Health Check endpoints" },
+            { name: "Services", description: "Service management endpoints" },
+            { name: "Blog", description: "Blog post management endpoints" },
+            { name: "Portfolio", description: "Portfolio project endpoints" },
+            { name: "Team", description: "Team member endpoints" },
+            { name: "FAQs", description: "FAQ management endpoints" },
+            { name: "Contact", description: "Contact form submission endpoints" },
+            { name: "Applications", description: "Service application endpoints" }
+        ],
+        components: {
+            schemas: {
+                Service: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer", description: "Service ID" },
+                        key: { type: "string", description: "Unique service key" },
+                        title: { type: "string", description: "Service title" },
+                        shortDescription: { type: "string", description: "Brief description" },
+                        fullDescription: { type: "string", description: "Detailed description" },
+                        icon: { type: "string", description: "Service icon emoji" }
+                    }
+                },
+                BlogPost: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer", description: "Post ID" },
+                        slug: { type: "string", description: "URL-friendly slug" },
+                        title: { type: "string", description: "Post title" },
+                        excerpt: { type: "string", description: "Short excerpt" },
+                        content: { type: "string", description: "Full content" },
+                        author: { type: "string", description: "Author name" },
+                        publishDate: { type: "string", format: "date", description: "Publish date" },
+                        formattedDate: { type: "string", description: "Formatted date string" }
+                    }
+                },
+                PortfolioProject: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer", description: "Project ID" },
+                        slug: { type: "string", description: "URL-friendly slug" },
+                        title: { type: "string", description: "Project title" },
+                        category: { type: "string", description: "Project category" },
+                        description: { type: "string", description: "Project description" },
+                        image: { type: "string", description: "Image filename" }
+                    }
+                },
+                TeamMember: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer", description: "Member ID" },
+                        name: { type: "string", description: "Member name" },
+                        position: { type: "string", description: "Job position" },
+                        bio: { type: "string", description: "Biography" },
+                        image: { type: "string", description: "Image filename" }
+                    }
+                },
+                FAQ: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer", description: "FAQ ID" },
+                        question: { type: "string", description: "FAQ question" },
+                        answer: { type: "string", description: "FAQ answer" }
+                    }
+                },
+                ContactSubmission: {
+                    type: "object",
+                    required: ["name", "email", "subject", "message"],
+                    properties: {
+                        name: { type: "string", description: "Full name" },
+                        email: { type: "string", format: "email", description: "Email address" },
+                        subject: { type: "string", description: "Message subject" },
+                        message: { type: "string", description: "Message content" }
+                    }
+                },
+                ApplicationSubmission: {
+                    type: "object",
+                    required: ["name", "email", "service_type", "requirements"],
+                    properties: {
+                        company: { type: "string", description: "Company name" },
+                        name: { type: "string", description: "Contact person name" },
+                        email: { type: "string", format: "email", description: "Email address" },
+                        phone: { type: "string", description: "Phone number" },
+                        service_type: { type: "string", description: "Type of service interested in" },
+                        requirements: { type: "string", description: "Project requirements" }
+                    }
+                },
+                Error: {
+                    type: "object",
+                    properties: {
+                        success: { type: "boolean", default: false },
+                        error: { type: "string", description: "Error message" }
+                    }
+                },
+                Success: {
+                    type: "object",
+                    properties: {
+                        success: { type: "boolean", default: true },
+                        message: { type: "string", description: "Success message" },
+                        id: { type: "integer", description: "Created record ID" }
+                    }
+                }
+            },
+            responses: {
+                NotFound: {
+                    description: "Resource not found",
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/Error" }
+                        }
+                    }
+                },
+                BadRequest: {
+                    description: "Invalid input",
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/Error" }
+                        }
+                    }
+                },
+                ServerError: {
+                    description: "Server error",
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/Error" }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    apis: [__filename], // This file contains the JSDoc comments
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: "Junior Reactive API Documentation",
+    customfavIcon: "https://juniorreactive.com/favicon.ico"
+}));
+
+// Serve JSON version of Swagger spec
+app.get("/api-docs.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(swaggerSpec);
+});
+
+// ============ DATABASE CONNECTION POOL ============
+let pool;
+async function getPool() {
+    if (!pool) {
+        pool = await sql.connect(dbConfig);
+    }
+    return pool;
+}
+
+// ============ API ENDPOINTS WITH SWAGGER DOCS ============
+
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Check API and database health
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "OK"
+ *                 message:
+ *                   type: string
+ *                   example: "Server is running"
+ *                 database:
+ *                   type: string
+ *                   example: "Connected"
+ *       500:
+ *         description: Database connection failed
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.get("/api/health", async (req, res) => {
+    try {
+        const pool = await getPool();
+        await pool.request().query("SELECT 1");
+        res.json({ 
+            status: "OK", 
+            message: "Server is running",
+            database: "Connected",
+            timestamp: new Date().toISOString()
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            status: "Error", 
+            message: "Database connection failed",
+            error: err.message 
+        });
+    }
+});
+
+/**
+ * @swagger
+ * /api/services:
+ *   get:
+ *     summary: Get all services
+ *     tags: [Services]
+ *     responses:
+ *       200:
+ *         description: List of services
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Service'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.get("/api/services", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                ServiceID as id,
+                ServiceKey as key,
+                Title as title,
+                ShortDescription as shortDescription,
+                Icon as icon
+            FROM Services 
+            ORDER BY ServiceID
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/services/{id}:
+ *   get:
+ *     summary: Get a single service by ID or key
+ *     tags: [Services]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Service ID or key (e.g., "1" or "ai-consulting")
+ *     responses:
+ *       200:
+ *         description: Service details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Service'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.get("/api/services/:id", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request()
+            .input("id", sql.NVarChar, req.params.id)
+            .query(`
+                SELECT 
+                    ServiceID as id,
+                    ServiceKey as key,
+                    Title as title,
+                    ShortDescription as shortDescription,
+                    FullDescription as fullDescription,
+                    Icon as icon
+                FROM Services 
+                WHERE ServiceKey = @id OR ServiceID = @id
+            `);
+        
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, error: "Service not found" });
+        }
+        
+        res.json({ success: true, data: result.recordset[0] });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/blog:
+ *   get:
+ *     summary: Get all blog posts
+ *     tags: [Blog]
+ *     responses:
+ *       200:
+ *         description: List of blog posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/BlogPost'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.get("/api/blog", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                PostID as id,
+                Slug as slug,
+                Title as title,
+                Excerpt as excerpt,
+                Author as author,
+                PublishDate as publishDate,
+                FORMAT(PublishDate, 'MMMM dd, yyyy') as formattedDate
+            FROM BlogPosts 
+            ORDER BY PublishDate DESC
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/blog/{slug}:
+ *   get:
+ *     summary: Get a single blog post by slug
+ *     tags: [Blog]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Blog post slug (e.g., "future-of-ai")
+ *     responses:
+ *       200:
+ *         description: Blog post details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/BlogPost'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.get("/api/blog/:slug", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request()
+            .input("slug", sql.NVarChar, req.params.slug)
+            .query(`
+                SELECT 
+                    PostID as id,
+                    Slug as slug,
+                    Title as title,
+                    Excerpt as excerpt,
+                    Content as content,
+                    Author as author,
+                    PublishDate as publishDate,
+                    FORMAT(PublishDate, 'MMMM dd, yyyy') as formattedDate
+                FROM BlogPosts 
+                WHERE Slug = @slug
+            `);
+        
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ success: false, error: "Blog post not found" });
+        }
+        
+        res.json({ success: true, data: result.recordset[0] });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/portfolio:
+ *   get:
+ *     summary: Get all portfolio projects
+ *     tags: [Portfolio]
+ *     responses:
+ *       200:
+ *         description: List of portfolio projects
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/PortfolioProject'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.get("/api/portfolio", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                ProjectID as id,
+                Slug as slug,
+                Title as title,
+                Category as category,
+                Description as description,
+                ImageFileName as image
+            FROM PortfolioProjects 
+            ORDER BY ProjectID
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/team:
+ *   get:
+ *     summary: Get all team members
+ *     tags: [Team]
+ *     responses:
+ *       200:
+ *         description: List of team members
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TeamMember'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.get("/api/team", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                MemberID as id,
+                Name as name,
+                Position as position,
+                Bio as bio,
+                ImageFileName as image
+            FROM TeamMembers 
+            ORDER BY DisplayOrder
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/faqs:
+ *   get:
+ *     summary: Get all FAQs
+ *     tags: [FAQs]
+ *     responses:
+ *       200:
+ *         description: List of FAQs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/FAQ'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.get("/api/faqs", async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT 
+                FAQID as id,
+                Question as question,
+                Answer as answer
+            FROM FAQs 
+            ORDER BY DisplayOrder
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/contact:
+ *   post:
+ *     summary: Submit a contact form
+ *     tags: [Contact]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ContactSubmission'
+ *     responses:
+ *       201:
+ *         description: Form submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.post("/api/contact", async (req, res) => {
+    try {
+        const { name, email, subject, message } = req.body;
+        
+        // Validate required fields
+        if (!name || !email || !subject || !message) {
+            return res.status(400).json({ 
+                success: false, 
+                error: "All fields are required" 
+            });
+        }
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid email format"
+            });
+        }
+        
+        const pool = await getPool();
+        const result = await pool.request()
+            .input("name", sql.NVarChar, name)
+            .input("email", sql.NVarChar, email)
+            .input("subject", sql.NVarChar, subject)
+            .input("message", sql.NVarChar, message)
+            .query(`
+                INSERT INTO ContactSubmissions (FullName, Email, Subject, Message)
+                OUTPUT INSERTED.SubmissionID as id
+                VALUES (@name, @email, @subject, @message)
+            `);
+        
+        res.status(201).json({ 
+            success: true, 
+            message: "Contact form submitted successfully",
+            id: result.recordset[0].id
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/**
+ * @swagger
+ * /api/apply:
+ *   post:
+ *     summary: Submit a service application
+ *     tags: [Applications]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ApplicationSubmission'
+ *     responses:
+ *       201:
+ *         description: Application submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+app.post("/api/apply", async (req, res) => {
+    try {
+        const { company, name, email, phone, service_type, requirements } = req.body;
+        
+        // Validate required fields
+        if (!name || !email || !service_type || !requirements) {
+            return res.status(400).json({ 
+                success: false, 
+                error: "Name, email, service type, and requirements are required" 
+            });
+        }
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid email format"
+            });
+        }
+        
+        const pool = await getPool();
+        const result = await pool.request()
+            .input("company", sql.NVarChar, company || null)
+            .input("name", sql.NVarChar, name)
+            .input("email", sql.NVarChar, email)
+            .input("phone", sql.NVarChar, phone || null)
+            .input("service_type", sql.NVarChar, service_type)
+            .input("requirements", sql.NVarChar, requirements)
+            .query(`
+                INSERT INTO ServiceApplications (Company, ContactPerson, Email, Phone, ServiceType, Requirements)
+                OUTPUT INSERTED.ApplicationID as id
+                VALUES (@company, @name, @email, @phone, @service_type, @requirements)
+            `);
+        
+        res.status(201).json({ 
+            success: true, 
+            message: "Application submitted successfully",
+            id: result.recordset[0].id
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Handle cleanup on server shutdown
+process.on("SIGINT", async () => {
+    if (pool) {
+        await pool.close();
+        console.log("Database connection closed");
+    }
+    process.exit(0);
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log("=".repeat(60));
+    console.log("🚀 JUNIOR REACTIVE API SERVER");
+    console.log("=".repeat(60));
+    console.log(`📡 Server:   http://localhost:${PORT}`);
+    console.log(`📚 Swagger:  http://localhost:${PORT}/api-docs`);
+    console.log(`📋 JSON:     http://localhost:${PORT}/api-docs.json`);
+    console.log("=".repeat(60));
+    console.log("\n📌 Available Endpoints:");
+    console.log("   GET  /api/health");
+    console.log("   GET  /api/services");
+    console.log("   GET  /api/services/:id");
+    console.log("   GET  /api/blog");
+    console.log("   GET  /api/blog/:slug");
+    console.log("   GET  /api/portfolio");
+    console.log("   GET  /api/team");
+    console.log("   GET  /api/faqs");
+    console.log("   POST /api/contact");
+    console.log("   POST /api/apply");
+    console.log("=".repeat(60));
+});
+
+
+====================================================
+FILE: backend\package-lock.json
+====================================================
+Content omitted (large file)
+
+====================================================
+FILE: backend\package.json
+====================================================
+{
+  "name": "jr-website-backend",
+  "version": "1.0.0",
+  "description": "Junior Reactive Website Backend",
+  "main": "server-fixed.js",
+  "scripts": {
+    "start": "node server-fixed.js",
+    "dev": "nodemon server-fixed.js",
+    "db:create": "node create-full-schema.js",
+    "db:test": "node test-connection.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mssql": "^9.1.1",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.10.0",
+    "express-validator": "^7.0.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
+    "nodemailer": "^6.9.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+
+
+====================================================
+FILE: backend\.env
+====================================================
+PORT=5000
+DB_USER=JR
+DB_PASSWORD=0000
+DB_SERVER=localhost
+DB_DATABASE=JRWebsite
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
+FRONTEND_URL=http://localhost:3000
+
+====================================================
+FILE: backend\.env.example
+====================================================
+PORT=5001
+DB_USER=JR
+DB_PASSWORD=your_password_here
+DB_SERVER=localhost
+DB_DATABASE=JRWebsite
+FRONTEND_URL=http://localhost:3000
+
+
+====================================================
+FILE: backend\config\db.js
+====================================================
+const sql = require('mssql');
+
+const config = {
+    user: process.env.DB_USER || 'JR',
+    password: process.env.DB_PASSWORD || '0000',
+    server: process.env.DB_SERVER || 'localhost',
+    database: process.env.DB_DATABASE || 'JRWebsite',
+    options: {
+        encrypt: false,
+        trustServerCertificate: true,
+        enableArithAbort: true
+    },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    }
+};
+
+let pool = null;
+
+async function connectDB() {
+    try {
+        pool = await sql.connect(config);
+        console.log('✅ Connected to Microsoft SQL Server');
+        return pool;
+    } catch (err) {
+        console.error('❌ Database connection failed:', err);
+        process.exit(1);
+    }
+}
+
+function getPool() {
+    if (!pool) {
+        throw new Error('Database not connected. Call connectDB first.');
+    }
+    return pool;
+}
+
+module.exports = { sql, connectDB, getPool };
+
+====================================================
+FILE: backend\config\env.js
+====================================================
+const dotenv = require('dotenv');
+dotenv.config();
+
+const requiredEnv = ['DB_USER', 'DB_PASSWORD', 'DB_SERVER', 'DB_DATABASE'];
+const missing = requiredEnv.filter(key => !process.env[key]);
+
+if (missing.length) {
+    console.error(`Missing required environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+}
+
+module.exports = {
+    port: process.env.PORT || 5000,
+    db: {
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        server: process.env.DB_SERVER,
+        database: process.env.DB_DATABASE,
+    },
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+};
+
+====================================================
+FILE: backend\controllers\contentController.js
+====================================================
+const serviceModel = require('../models/serviceModel');
+const blogModel = require('../models/blogModel');
+const portfolioModel = require('../models/portfolioModel');
+
+async function getServices(req, res, next) {
+    try {
+        const services = await serviceModel.getAllServices();
+        res.json({ success: true, data: services });
+    } catch (err) {
+        next(err);
+    }
+}
+
+async function getServiceById(req, res, next) {
+    try {
+        const service = await serviceModel.getServiceById(req.params.id);
+        if (!service) {
+            return res.status(404).json({ success: false, error: 'Service not found' });
+        }
+        res.json({ success: true, data: service });
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { getServices, getServiceById };
+
+====================================================
+FILE: backend\controllers\submissionController.js
+====================================================
+const contactModel = require('../models/contactModel');
+const applicationModel = require('../models/applicationModel');
+
+async function submitContact(req, res, next) {
+    try {
+        const submissionId = await contactModel.createContactSubmission(req.body);
+        res.status(201).json({ 
+            success: true, 
+            message: 'Contact form submitted successfully',
+            id: submissionId 
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+async function submitApplication(req, res, next) {
+    try {
+        const submissionId = await applicationModel.createApplicationSubmission(req.body);
+        res.status(201).json({ 
+            success: true, 
+            message: 'Application submitted successfully',
+            id: submissionId 
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { submitContact, submitApplication };
+
+====================================================
+FILE: backend\models\applicationModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function createApplicationSubmission(data) {
+    const pool = getPool();
+    const result = await pool.request()
+        .input('company', data.company)
+        .input('name', data.name)
+        .input('email', data.email)
+        .input('phone', data.phone)
+        .input('service_type', data.service_type)
+        .input('requirements', data.requirements)
+        .query(`
+            INSERT INTO ServiceApplications (Company, ContactPerson, Email, Phone, ServiceType, Requirements)
+            OUTPUT INSERTED.ApplicationID AS id
+            VALUES (@company, @name, @email, @phone, @service_type, @requirements);
+        `);
+    return result.recordset[0].id;
+}
+
+module.exports = { createApplicationSubmission };
+
+====================================================
+FILE: backend\models\blogModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function getAllPosts() {
+    const pool = getPool();
+    const result = await pool.request()
+        .query('SELECT PostID, Slug, Title, Excerpt, Author, PublishDate FROM BlogPosts ORDER BY PublishDate DESC');
+    return result.recordset;
+}
+
+async function getPostBySlug(slug) {
+    const pool = getPool();
+    const result = await pool.request()
+        .input('slug', slug)
+        .query('SELECT * FROM BlogPosts WHERE Slug = @slug');
+    return result.recordset[0];
+}
+
+module.exports = { getAllPosts, getPostBySlug };
+
+====================================================
+FILE: backend\models\contactModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function createContactSubmission(data) {
+    const pool = getPool();
+    const result = await pool.request()
+        .input('name', data.name)
+        .input('email', data.email)
+        .input('subject', data.subject)
+        .input('message', data.message)
+        .query(`
+            INSERT INTO ContactSubmissions (FullName, Email, Subject, Message)
+            OUTPUT INSERTED.SubmissionID AS id
+            VALUES (@name, @email, @subject, @message);
+        `);
+    return result.recordset[0].id;
+}
+
+module.exports = { createContactSubmission };
+
+====================================================
+FILE: backend\models\email.js
+====================================================
+const nodemailer = require('nodemailer');
+
+async function sendContactNotification(data) {
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    const mailOptions = {
+        from: `"Junior Reactive" <${process.env.EMAIL_USER}>`,
+        to: 'juniorreactive@gmail.com',
+        subject: `New Contact: ${data.subject}`,
+        html: `
+            <h3>New Contact Form Submission</h3>
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Subject:</strong> ${data.subject}</p>
+            <p><strong>Message:</strong></p>
+            <p>${data.message}</p>
+        `
+    };
+
+    await transporter.sendMail(mailOptions);
+}
+
+module.exports = { sendContactNotification };
+
+====================================================
+FILE: backend\models\portfolioModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function getAllProjects() {
+    const pool = getPool();
+    const result = await pool.request()
+        .query('SELECT ProjectID, Slug, Title, Category, Description, ImageFileName FROM PortfolioProjects ORDER BY ProjectID');
+    return result.recordset;
+}
+
+module.exports = { getAllProjects };
+
+====================================================
+FILE: backend\models\serviceModel.js
+====================================================
+const { getPool } = require('../config/db');
+
+async function getAllProjects() {
+    const pool = getPool();
+    const result = await pool.request()
+        .query('SELECT ProjectID, Slug, Title, Category, Description, ImageFileName FROM PortfolioProjects ORDER BY ProjectID');
+    return result.recordset;
+}
+
+module.exports = { getAllProjects };
+
+====================================================
+FILE: backend\routes\contentRoutes.js
+====================================================
+const express = require('express');
+const router = express.Router();
+const contentController = require('../controllers/contentController');
+
+router.get('/services', contentController.getServices);
+router.get('/services/:id', contentController.getServiceById);
+// Add more routes for blog, portfolio etc.
+
+module.exports = router;
+
+====================================================
+FILE: backend\routes\submissionRoutes.js
+====================================================
+const express = require('express');
+const router = express.Router();
+const submissionController = require('../controllers/submissionController');
+const { validateContact, validateApplication } = require('../middleware/validation');
+
+router.post('/contact', validateContact, submissionController.submitContact);
+router.post('/apply', validateApplication, submissionController.submitApplication);
+
+module.exports = router;
+
+====================================================
+FILE: backend\middleware\errorHandler.js
+====================================================
+const errorHandler = (err, req, res, next) => {
+    console.error(err.stack);
+
+    let error = { ...err };
+    error.message = err.message;
+
+    if (err.name === 'ConnectionError' || err.name === 'RequestError') {
+        error.message = 'Database error occurred';
+        error.statusCode = 500;
+    }
+
+    res.status(error.statusCode || 500).json({
+        success: false,
+        error: error.message || 'Server Error'
+    });
+};
+
+module.exports = errorHandler;
+
+====================================================
+FILE: backend\middleware\validation.js
+====================================================
+const { body, validationResult } = require('express-validator');
+
+// Contact form validation rules
+const validateContact = [
+    body('name').trim().notEmpty().withMessage('Name is required').isLength({ max: 100 }),
+    body('email').trim().notEmpty().withMessage('Email is required').isEmail().normalizeEmail(),
+    body('subject').trim().notEmpty().withMessage('Subject is required').isLength({ max: 200 }),
+    body('message').trim().notEmpty().withMessage('Message is required').isLength({ max: 5000 }),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    }
+];
+
+// Application form validation rules
+const validateApplication = [
+    body('company').optional().trim().isLength({ max: 100 }),
+    body('name').trim().notEmpty().withMessage('Contact person name is required').isLength({ max: 100 }),
+    body('email').trim().notEmpty().withMessage('Email is required').isEmail().normalizeEmail(),
+    body('phone').optional().trim().isLength({ max: 50 }),
+    body('service_type').trim().notEmpty().withMessage('Service type is required'),
+    body('requirements').trim().notEmpty().withMessage('Requirements are required').isLength({ max: 10000 }),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    }
+];
+
+module.exports = { validateContact, validateApplication };
+
+====================================================
+FILE: backend\utils\email.js
+====================================================
+const nodemailer = require('nodemailer');
+
+async function sendContactNotification(data) {
+    // Configure your email transporter
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    // Implementation for sending email
+    // This is a placeholder
+    console.log('Email notification would be sent:', data);
+}
+
+module.exports = { sendContactNotification };
+
+
+====================================================
+FILE: frontend\src\__tests__\services\api.test.js
+====================================================
+import api from '../../../services/api';
+
+describe('api service', () => {
+  test('has correct baseURL', () => {
+    expect(api.defaults.baseURL).toBe(process.env.REACT_APP_API_URL || 'http://localhost:5001/api');
+  });
+});
+
+
+====================================================
+FILE: frontend\src\__tests__\services\contentService.test.js
+====================================================
+import { contentService } from '../../../services/contentService';
+import api from '../../../services/api';
+
+jest.mock('../../../services/api');
+
+describe('contentService', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('getServices calls correct endpoint', () => {
+    contentService.getServices();
+    expect(api.get).toHaveBeenCalledWith('/services');
+  });
+
+  test('getServiceById calls with id', () => {
+    contentService.getServiceById('ai-consulting');
+    expect(api.get).toHaveBeenCalledWith('/services/ai-consulting');
+  });
+
+  test('getBlogPosts calls correct endpoint', () => {
+    contentService.getBlogPosts();
+    expect(api.get).toHaveBeenCalledWith('/blog');
+  });
+
+  test('getBlogPostBySlug calls with slug', () => {
+    contentService.getBlogPostBySlug('future-of-ai');
+    expect(api.get).toHaveBeenCalledWith('/blog/future-of-ai');
+  });
+
+  test('getPortfolioProjects calls correct endpoint', () => {
+    contentService.getPortfolioProjects();
+    expect(api.get).toHaveBeenCalledWith('/portfolio');
+  });
+
+  test('getTeamMembers calls correct endpoint', () => {
+    contentService.getTeamMembers();
+    expect(api.get).toHaveBeenCalledWith('/team');
+  });
+
+  test('getFAQs calls correct endpoint', () => {
+    contentService.getFAQs();
+    expect(api.get).toHaveBeenCalledWith('/faqs');
+  });
+});
+
+
+====================================================
+FILE: frontend\src\__tests__\services\submissionService.test.js
+====================================================
+import { submissionService } from '../../../services/submissionService';
+import api from '../../../services/api';
+
+jest.mock('../../../services/api');
+
+describe('submissionService', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('submitContact posts to /contact with data', () => {
+    const data = { name: 'Test', email: 'test@test.com', subject: 'Hi', message: 'Hello' };
+    submissionService.submitContact(data);
+    expect(api.post).toHaveBeenCalledWith('/contact', data);
+  });
+
+  test('submitApplication posts to /apply with data', () => {
+    const data = { company: 'Acme', name: 'John', email: 'j@j.com', service_type: 'AI', requirements: 'Need help' };
+    submissionService.submitApplication(data);
+    expect(api.post).toHaveBeenCalledWith('/apply', data);
+  });
+});
+
+
+====================================================
+FILE: frontend\src\services\api.js
+====================================================
+import axios from 'axios';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    timeout: 10000, // 10 second timeout
+});
+
+// Request interceptor
+api.interceptors.request.use(
+    (config) => {
+        console.log(`🚀 Making ${config.method.toUpperCase()} request to ${config.url}`);
+        return config;
+    },
+    (error) => {
+        console.error('Request error:', error);
+        return Promise.reject(error);
+    }
+);
+
+// Response interceptor
+api.interceptors.response.use(
+    (response) => {
+        console.log('✅ Response received:', response.data);
+        return response;
+    },
+    (error) => {
+        if (error.code === 'ECONNABORTED') {
+            console.error('❌ Request timeout - backend may be down');
+        } else if (error.response) {
+            console.error('❌ Server responded with error:', error.response.status, error.response.data);
+        } else if (error.request) {
+            console.error('❌ No response received - backend may be down or CORS issue');
+            console.error('   Make sure backend is running on:', API_BASE_URL);
+        } else {
+            console.error('❌ Error setting up request:', error.message);
+        }
+        return Promise.reject(error);
+    }
+);
+
+export default api;
+
+====================================================
+FILE: frontend\src\services\contentService.js
+====================================================
+import api from './api';
+
+export const contentService = {
+    // Services
+    getServices: () => api.get('/services'),
+    getServiceById: (id) => api.get(`/services/${id}`),
+
+    // Blog
+    getBlogPosts: () => api.get('/blog'),
+    getBlogPostBySlug: (slug) => api.get(`/blog/${slug}`),
+
+    // Portfolio
+    getPortfolioProjects: () => api.get('/portfolio'),
+
+    // Team
+    getTeamMembers: () => api.get('/team'),
+
+    // FAQs
+    getFAQs: () => api.get('/faqs'),
+};
+
+====================================================
+FILE: frontend\src\services\submissionService.js
+====================================================
+import api from './api';
+
+export const submissionService = {
+    submitContact: (data) => api.post('/contact', data),
+    submitApplication: (data) => api.post('/apply', data),
+};
+
+====================================================
+FILE: frontend\src\App.js
+====================================================
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import './assets/css/global.css';
+
+// Common components
+import Header from './components/common/Header';
+import Footer from './components/common/Footer';
+import Chatbot from './components/common/Chatbot';
+
+// Pages
+import HomePage from './pages/HomePage';
+import ServicesPage from './pages/ServicesPage';
+import ServiceDetailPage from './pages/ServiceDetailPage';
+import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import ApplyPage from './pages/ApplyPage';
+import PortfolioPage from './pages/PortfolioPage';
+import TeamPage from './pages/TeamPage';
+import FAQPage from './pages/FAQPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import NotFoundPage from './pages/NotFoundPage';
+
+const queryClient = new QueryClient();
+
+function App() {
+    return (
+        <QueryClientProvider client={queryClient}>
+            <Router>
+                <Header />
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/services" element={<ServicesPage />} />
+                    <Route path="/services/:id" element={<ServiceDetailPage />} />
+                    <Route path="/blog" element={<BlogPage />} />
+                    <Route path="/blog/:slug" element={<BlogPostPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/apply" element={<ApplyPage />} />
+                    <Route path="/portfolio" element={<PortfolioPage />} />
+                    <Route path="/team" element={<TeamPage />} />
+                    <Route path="/faq" element={<FAQPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+                <Footer />
+                <Chatbot />
+            </Router>
+        </QueryClientProvider>
+    );
+}
+
+export default App;
+
+
+====================================================
+FILE: frontend\src\index.js
+====================================================
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+    <React.StrictMode>
+        <App />
+    </React.StrictMode>
+);
+
+====================================================
+FILE: frontend\src\__tests__\components\common\Button.test.jsx
+====================================================
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import Button from '../../../components/common/Button';
+
+describe('Button component', () => {
+  test('renders children', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+
+  test('applies primary class by default', () => {
+    render(<Button>Primary</Button>);
+    const btn = screen.getByText('Primary');
+    expect(btn).toHaveClass('btn');
+  });
+
+  test('applies outline class when variant is outline', () => {
+    render(<Button variant="outline">Outline</Button>);
+    const btn = screen.getByText('Outline');
+    expect(btn).toHaveClass('btn-outline');
+  });
+
+  test('calls onClick when clicked', async () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click</Button>);
+    await userEvent.click(screen.getByText('Click'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  test('is disabled when disabled prop is true', () => {
+    render(<Button disabled>Disabled</Button>);
+    expect(screen.getByText('Disabled')).toBeDisabled();
+  });
+});
+
+
+====================================================
+FILE: frontend\src\__tests__\components\common\Card.test.jsx
+====================================================
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import Card from '../../../components/common/Card';
+
+describe('Card', () => {
+  const props = {
+    icon: '🤖',
+    title: 'Test Service',
+    description: 'This is a test description.',
+    linkTo: '/test',
+    linkText: 'Learn More'
+  };
+
+  test('renders icon, title, description, and link', () => {
+    render(
+      <BrowserRouter>
+        <Card {...props} />
+      </BrowserRouter>
+    );
+    expect(screen.getByText('🤖')).toBeInTheDocument();
+    expect(screen.getByText('Test Service')).toBeInTheDocument();
+    expect(screen.getByText('This is a test description.')).toBeInTheDocument();
+    expect(screen.getByText('Learn More')).toBeInTheDocument();
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/test');
+  });
+});
+
+
+====================================================
+FILE: frontend\src\__tests__\components\common\Footer.test.jsx
+====================================================
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import Footer from '../../../components/common/Footer';
+
+describe('Footer', () => {
+  test('renders company info and links', () => {
+    render(
+      <BrowserRouter>
+        <Footer />
+      </BrowserRouter>
+    );
+    expect(screen.getByText(/Junior Reactive/i)).toBeInTheDocument();
+    expect(screen.getByText('Services')).toBeInTheDocument();
+    expect(screen.getByText('Portfolio')).toBeInTheDocument();
+    expect(screen.getByText('Apply for Services')).toBeInTheDocument();
+    expect(screen.getByText('FAQ')).toBeInTheDocument();
+    expect(screen.getByText(/\+256 764524816/i)).toBeInTheDocument();
+    expect(screen.getByText(/juniorreactive@gmail.com/i)).toBeInTheDocument();
+  });
+});
+
+
+====================================================
+FILE: frontend\src\__tests__\components\common\Header.test.jsx
+====================================================
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import Header from '../../../components/common/Header';
+
+describe('Header', () => {
+  test('renders logo and navigation links', () => {
+    render(
+      <BrowserRouter>
+        <Header />
+      </BrowserRouter>
+    );
+    expect(screen.getByAltText(/Junior Reactive Logo/i)).toBeInTheDocument();
+    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.getByText('Services')).toBeInTheDocument();
+    expect(screen.getByText('About')).toBeInTheDocument();
+    expect(screen.getByText('Blog')).toBeInTheDocument();
+    expect(screen.getByText('Contact')).toBeInTheDocument();
+  });
+});
+
+
+====================================================
+FILE: frontend\src\__tests__\components\forms\ApplicationForm.test.jsx
+====================================================
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
+import ApplicationForm from '../../../components/forms/ApplicationForm';
+import { submissionService } from '../../../services/submissionService';
+
+jest.mock('../../../services/submissionService');
+
+describe('ApplicationForm', () => {
+  beforeEach(() => {
+    submissionService.submitApplication.mockResolvedValue({ data: { success: true } });
+  });
+
+  test('renders required fields', () => {
+    render(
+      <BrowserRouter>
+        <ApplicationForm />
+      </BrowserRouter>
+    );
+    expect(screen.getByLabelText(/Contact Person Name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Service Interested In/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Project Requirements/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Submit Application/i })).toBeInTheDocument();
+  });
+
+  test('submits form with data', async () => {
+    render(
+      <BrowserRouter>
+        <ApplicationForm />
+      </BrowserRouter>
+    );
+    await userEvent.type(screen.getByLabelText(/Contact Person Name/i), 'Jane Doe');
+    await userEvent.type(screen.getByLabelText(/Email Address/i), 'jane@example.com');
+    await userEvent.type(screen.getByLabelText(/Company Name/i), 'Acme Inc');
+    await userEvent.type(screen.getByLabelText(/Phone Number/i), '123456789');
+    await userEvent.selectOptions(screen.getByLabelText(/Service Interested In/i), 'AI Consulting');
+    await userEvent.type(screen.getByLabelText(/Project Requirements/i), 'Need AI solution.');
+    await userEvent.click(screen.getByRole('button', { name: /Submit Application/i }));
+
+    await waitFor(() => {
+      expect(submissionService.submitApplication).toHaveBeenCalledWith({
+        company: 'Acme Inc',
+        name: 'Jane Doe',
+        email: 'jane@example.com',
+        phone: '123456789',
+        service_type: 'AI Consulting',
+        requirements: 'Need AI solution.'
+      });
+    });
+  });
+});
+
+
+====================================================
+FILE: frontend\src\__tests__\components\forms\ContactForm.test.jsx
+====================================================
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import ContactForm from '../../../components/forms/ContactForm';
+import { submissionService } from '../../../services/submissionService';
+
+jest.mock('../../../services/submissionService');
+
+describe('ContactForm', () => {
+  beforeEach(() => {
+    submissionService.submitContact.mockResolvedValue({ data: { success: true } });
+  });
+
+  test('renders all fields and submit button', () => {
+    render(<ContactForm />);
+    expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Subject/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Message/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Send Message/i })).toBeInTheDocument();
+  });
+
+  test('submits form with correct data', async () => {
+    render(<ContactForm />);
+    await userEvent.type(screen.getByLabelText(/Full Name/i), 'John Doe');
+    await userEvent.type(screen.getByLabelText(/Email Address/i), 'john@example.com');
+    await userEvent.type(screen.getByLabelText(/Subject/i), 'Test Subject');
+    await userEvent.type(screen.getByLabelText(/Message/i), 'Test message');
+    await userEvent.click(screen.getByRole('button', { name: /Send Message/i }));
+
+    await waitFor(() => {
+      expect(submissionService.submitContact).toHaveBeenCalledWith({
+        name: 'John Doe',
+        email: 'john@example.com',
+        subject: 'Test Subject',
+        message: 'Test message'
+      });
+    });
+  });
+});
+
+
+====================================================
+FILE: frontend\src\__tests__\pages\HomePage.test.jsx
+====================================================
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import HomePage from '../../../pages/HomePage';
+
+const queryClient = new QueryClient();
+
+describe('HomePage', () => {
+  test('renders hero section', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <HomePage />
+        </BrowserRouter>
+      </QueryClientProvider>
+    );
+    expect(screen.getByText(/AI That Works For You/i)).toBeInTheDocument();
+    expect(screen.getByText(/Explore Services/i)).toBeInTheDocument();
+    expect(screen.getByText(/Contact Us/i)).toBeInTheDocument();
+  });
+});
+
+
+====================================================
+FILE: frontend\src\components\common\Button.jsx
+====================================================
+import React from 'react';
+import './Button.css';
+
+const Button = ({ 
+    children, 
+    variant = 'primary', 
+    onClick, 
+    type = 'button', 
+    className = '',
+    disabled = false,
+    fullWidth = false
+}) => {
+    const buttonClasses = [
+        'btn',
+        variant === 'outline' ? 'btn-outline' : '',
+        variant === 'secondary' ? 'btn-secondary' : '',
+        variant === 'accent' ? 'btn-accent' : '',
+        fullWidth ? 'btn-full-width' : '',
+        className
+    ].filter(Boolean).join(' ');
+
+    return (
+        <button
+            type={type}
+            className={buttonClasses}
+            onClick={onClick}
+            disabled={disabled}
+        >
+            {children}
+        </button>
+    );
+};
+
+export default Button;
+
+====================================================
+FILE: frontend\src\components\common\Card.jsx
+====================================================
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Card = ({ icon, title, description, linkTo, linkText = 'Learn More →' }) => {
+    return (
+        <div className="card">
+            {icon && <div className="card-icon">{icon}</div>}
+            <h3>{title}</h3>
+            <p>{description}</p>
+            {linkTo && <Link to={linkTo} style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>{linkText}</Link>}
+        </div>
+    );
+};
+
+export default Card;
+
+====================================================
+FILE: frontend\src\components\common\Chatbot.jsx
+====================================================
+import React, { useState } from 'react';
+import './Chatbot.css';
+
+// Simple rule‑based knowledge base
+const knowledgeBase = [
+  {
+    keywords: ['service', 'offer', 'do'],
+    answer: 'We offer AI consulting, custom software development, data analytics, cloud solutions, predictive modeling, and AI awareness sessions.'
+  },
+  {
+    keywords: ['ai consulting', 'consulting'],
+    answer: 'Our AI consulting service helps businesses identify opportunities for AI adoption and creates a tailored roadmap.'
+  },
+  {
+    keywords: ['custom software', 'development'],
+    answer: 'We build robust, scalable software tailored to your unique business requirements.'
+  },
+  {
+    keywords: ['data analytics', 'insights'],
+    answer: 'We transform raw data into actionable business intelligence to drive decision‑making.'
+  },
+  {
+    keywords: ['cloud', 'aws', 'azure'],
+    answer: 'We provide secure and scalable cloud solutions on AWS, Azure, and Google Cloud.'
+  },
+  {
+    keywords: ['predictive', 'model'],
+    answer: 'We create custom predictive models for sales forecasting, churn prediction, and operational optimization.'
+  },
+  {
+    keywords: ['awareness', 'workshop', 'session'],
+    answer: 'Our AI awareness sessions demystify AI for non‑technical teams and empower them to identify opportunities.'
+  },
+  {
+    keywords: ['price', 'cost', 'budget'],
+    answer: 'Costs vary by project scope. Contact us for a tailored quote.'
+  },
+  {
+    keywords: ['contact', 'reach', 'email', 'phone'],
+    answer: 'You can reach us at juniorreactive@gmail.com or +256 764524816.'
+  },
+  {
+    keywords: ['hello', 'hi', 'hey'],
+    answer: 'Hello! How can I assist you today?'
+  }
+];
+
+const Chatbot = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { from: 'bot', text: 'Hi! I’m your virtual assistant. Ask me about our services!' }
+  ]);
+  const [input, setInput] = useState('');
+
+  const toggleChat = () => setIsOpen(!isOpen);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+    const userMsg = input.trim();
+    setMessages(prev => [...prev, { from: 'user', text: userMsg }]);
+    setInput('');
+
+    // Find best match
+    const lower = userMsg.toLowerCase();
+    let matched = knowledgeBase.find(entry =>
+      entry.keywords.some(keyword => lower.includes(keyword))
+    );
+    let reply = matched
+      ? matched.answer
+      : "I'm sorry, I don't have an answer for that. Please contact us directly at juniorreactive@gmail.com.";
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, { from: 'bot', text: reply }]);
+    }, 500);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSend();
+  };
+
+  return (
+    <div className="chatbot-container">
+      <button className="chatbot-toggle" onClick={toggleChat}>
+        {isOpen ? '✕' : '💬'}
+      </button>
+      {isOpen && (
+        <div className="chatbot-window">
+          <div className="chatbot-header">
+            <span>Junior Reactive Assistant</span>
+            <button onClick={toggleChat}>✕</button>
+          </div>
+          <div className="chatbot-messages">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`message ${msg.from}`}>
+                {msg.text}
+              </div>
+            ))}
+          </div>
+          <div className="chatbot-input">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your question..."
+            />
+            <button onClick={handleSend}>Send</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Chatbot;
+
+====================================================
+FILE: frontend\src\components\common\Footer.jsx
+====================================================
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Footer = () => {
+    const currentYear = new Date().getFullYear();
+
+    return (
+        <footer>
+            <div className="container">
+                <div className="footer-grid">
+                    <div className="footer-col">
+                        <h3>Junior Reactive</h3>
+                        <p>AI that works for you. Empowering businesses with cutting-edge technology solutions.</p>
+                    </div>
+                    <div className="footer-col">
+                        <h3>Quick Links</h3>
+                        <ul>
+                            <li><Link to="/services">Services</Link></li>
+                            <li><Link to="/portfolio">Portfolio</Link></li>
+                            <li><Link to="/apply">Apply for Services</Link></li>
+                            <li><Link to="/faq">FAQ</Link></li>
+                        </ul>
+                    </div>
+                    <div className="footer-col">
+                        <h3>Contact</h3>
+                        <ul>
+                            <li> +256 764524816</li>
+                            <li> Kampala, Uganda</li>
+                            <li> juniorreactive@gmail.com</li>
+                        </ul>
+                    </div>
+                    <div className="footer-col">
+                        <h3>Follow Us</h3>
+                        <ul className="social-links">
+                            <li><a href="https://wa.me/256764524816" target="_blank" rel="noopener noreferrer"><i className="fab fa-whatsapp"></i> WhatsApp</a></li>
+                            <li><a href="https://instagram.com/juniorreactive" target="_blank" rel="noopener noreferrer"><i className="fab fa-instagram"></i> Instagram</a></li>
+                            <li><a href="https://tiktok.com/@juniorreactive" target="_blank" rel="noopener noreferrer"><i className="fab fa-tiktok"></i> TikTok</a></li>
+                        </ul>
+                    </div>
+                    <div className="footer-col">
+                        <h3>Legal</h3>
+                        <ul>
+                            <li><Link to="/privacy">Privacy Policy</Link></li>
+                            <li><Link to="/terms">Terms of Service</Link></li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="footer-bottom">
+                    <p>&copy; {currentYear} Junior Reactive. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    );
+};
+
+export default Footer;
+
+====================================================
+FILE: frontend\src\components\common\Header.jsx
+====================================================
+import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import './Header.css';
+
+const Header = () => {
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    const toggleMenu = () => setMenuOpen(!menuOpen);
+
+    return (
+        <header>
+            <div className="container nav-container">
+                <Link to="/" className="logo-link">
+                    <img src="/logo.png" alt="Junior Reactive Logo" className="logo-img" />
+                    <div className="logo-text">
+                        Junior <span>Reactive</span>
+                    </div>
+                </Link>
+                <button className="mobile-menu-toggle" onClick={toggleMenu}>☰</button>
+                <nav>
+                    <ul className={menuOpen ? 'active' : ''}>
+                        <li><NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>Home</NavLink></li>
+                        <li><NavLink to="/services" className={({ isActive }) => isActive ? 'active' : ''}>Services</NavLink></li>
+                        <li><NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''}>About</NavLink></li>
+                        {/* <li><NavLink to="/blog" className={({ isActive }) => isActive ? 'active' : ''}>Blog</NavLink></li> */}
+                        <li><NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''}>Contact</NavLink></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+    );
+};
+
+export default Header;
+
+====================================================
+FILE: frontend\src\components\forms\ApplicationForm.jsx
+====================================================
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { submissionService } from '../../services/submissionService';
+import Button from '../common/Button';
+
+const ApplicationForm = () => {
+    const [searchParams] = useSearchParams();
+    const [formData, setFormData] = useState({
+        company: '',
+        name: '',
+        email: '',
+        phone: '',
+        service_type: 'General Inquiry',
+        requirements: ''
+    });
+    const [status, setStatus] = useState({ type: '', message: '' });
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const serviceParam = searchParams.get('service');
+        if (serviceParam) {
+            setFormData(prev => ({ ...prev, service_type: serviceParam }));
+        }
+    }, [searchParams]);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setStatus({ type: '', message: '' });
+
+        try {
+            const response = await submissionService.submitApplication(formData);
+            if (response.data.success) {
+                setStatus({ type: 'success', message: 'Application submitted successfully!' });
+                setFormData({
+                    company: '',
+                    name: '',
+                    email: '',
+                    phone: '',
+                    service_type: 'General Inquiry',
+                    requirements: ''
+                });
+            }
+        } catch (error) {
+            setStatus({ type: 'error', message: error.response?.data?.error || 'Something went wrong.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} style={{ background: 'white', padding: 40, borderRadius: 8, boxShadow: 'var(--shadow-card)' }}>
+            <h3>Client Information</h3>
+            <div className="form-group">
+                <label htmlFor="company">Company Name</label>
+                <input type="text" id="company" name="company" value={formData.company} onChange={handleChange} />
+            </div>
+            <div className="form-group">
+                <label htmlFor="name">Contact Person Name *</label>
+                <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+                <label htmlFor="email">Email Address *</label>
+                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+                <label htmlFor="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} />
+            </div>
+
+            <h3 style={{ marginTop: 30 }}>Project Details</h3>
+            <div className="form-group">
+                <label htmlFor="service_type">Service Interested In</label>
+                <select id="service_type" name="service_type" value={formData.service_type} onChange={handleChange}>
+                    <option value="General Inquiry">General Inquiry</option>
+                    <option value="AI Consulting">AI Consulting</option>
+                    <option value="Custom Software Development">Custom Software</option>
+                    <option value="Data Analytics & Insights">Data Analytics</option>
+                    <option value="Cloud Solutions">Cloud Solutions</option>
+                </select>
+            </div>
+            <div className="form-group">
+                <label htmlFor="requirements">Project Requirements / Brief *</label>
+                <textarea id="requirements" name="requirements" rows="6" value={formData.requirements} onChange={handleChange} required />
+            </div>
+
+            {status.message && (
+                <div style={{ marginBottom: 15, padding: 10, borderRadius: 4, backgroundColor: status.type === 'success' ? '#d4edda' : '#f8d7da', color: status.type === 'success' ? '#155724' : '#721c24' }}>
+                    {status.message}
+                </div>
+            )}
+
+            <Button type="submit" disabled={loading} style={{ width: '100%', marginTop: 20 }}>
+                {loading ? 'Submitting...' : 'Submit Application'}
+            </Button>
+        </form>
+    );
+};
+
+export default ApplicationForm;
+
+====================================================
+FILE: frontend\src\components\forms\ContactForm.jsx
+====================================================
+import React, { useState } from 'react';
+import { submissionService } from '../../services/submissionService';
+import Button from '../common/Button';
+
+const ContactForm = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
+    const [status, setStatus] = useState({ type: '', message: '' });
+    const [loading, setLoading] = useState(false);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setStatus({ type: '', message: '' });
+
+        try {
+            const response = await submissionService.submitContact(formData);
+            if (response.data.success) {
+                setStatus({ type: 'success', message: 'Message sent successfully!' });
+                setFormData({ name: '', email: '', subject: '', message: '' });
+            }
+        } catch (error) {
+            setStatus({ type: 'error', message: error.response?.data?.error || 'Something went wrong.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} style={{ background: 'white', padding: 30, borderRadius: 8, boxShadow: 'var(--shadow-card)' }}>
+            <div className="form-group">
+                <label htmlFor="name">Full Name</label>
+                <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+                <label htmlFor="email">Email Address</label>
+                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+                <label htmlFor="subject">Subject</label>
+                <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+                <label htmlFor="message">Message</label>
+                <textarea id="message" name="message" rows="5" value={formData.message} onChange={handleChange} required />
+            </div>
+            {status.message && (
+                <div style={{ marginBottom: 15, padding: 10, borderRadius: 4, backgroundColor: status.type === 'success' ? '#d4edda' : '#f8d7da', color: status.type === 'success' ? '#155724' : '#721c24' }}>
+                    {status.message}
+                </div>
+            )}
+            <Button type="submit" disabled={loading}>
+                {loading ? 'Sending...' : 'Send Message'}
+            </Button>
+        </form>
+    );
+};
+
+export default ContactForm;
+
+====================================================
+FILE: frontend\src\components\layout\HeroSection.jsx
+====================================================
+import React from 'react';
+import Button from '../common/Button';
+
+const HeroSection = ({ title, subtitle, primaryBtnText, primaryBtnLink, secondaryBtnText, secondaryBtnLink }) => {
+    return (
+        <section className="hero">
+            <div className="container">
+                <h1>{title}</h1>
+                <p>{subtitle}</p>
+                {(primaryBtnText || secondaryBtnText) && (
+                    <div className="hero-btns">
+                        {primaryBtnText && (
+                            <Button
+                                onClick={() => window.location.href = primaryBtnLink}
+                                style={{ marginRight: '15px' }}
+                            >
+                                {primaryBtnText}
+                            </Button>
+                        )}
+                        {secondaryBtnText && (
+                            <Button
+                                variant="outline"
+                                onClick={() => window.location.href = secondaryBtnLink}
+                            >
+                                {secondaryBtnText}
+                            </Button>
+                        )}
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+};
+
+export default HeroSection;
+
+
+====================================================
+FILE: frontend\src\components\layout\ServicesGrid.jsx
+====================================================
+import React from 'react';
+import Card from '../common/Card';
+
+const ServicesGrid = ({ services }) => {
+    return (
+        <div className="services-grid">
+            {services.map(service => (
+                <Card
+                    key={service.id}
+                    icon={service.icon}
+                    title={service.title}
+                    description={service.shortDescription}
+                    linkTo={`/services/${service.key}`}
+                />
+            ))}
+        </div>
+    );
+};
+
+export default ServicesGrid;
+
+====================================================
+FILE: frontend\src\pages\AboutPage.jsx
+====================================================
+import React from 'react';
+import { Link } from 'react-router-dom';
+import HeroSection from '../components/layout/HeroSection';
+
+const AboutPage = () => {
+    return (
+        <main>
+            <HeroSection
+                title="About Us"
+                subtitle="Building the future with intelligence and integrity."
+            />
+
+            <section className="section">
+                <div className="container">
+                    <h2>Our Story</h2>
+                    <p>Founded by Pharrell Aaron Mugumya, Junior Reactive started with a simple mission: to make Artificial Intelligence accessible and effective for businesses of all sizes. We believe that technology should serve people, not the other way around.</p>
+
+                    <h2>Our Values</h2>
+                    <ul style={{ listStyle: 'disc', marginLeft: 20, marginBottom: 20 }}>
+                        <li><strong>Innovation:</strong> Constantly pushing boundaries.</li>
+                        <li><strong>Integrity:</strong> Honest and transparent dealings.</li>
+                        <li><strong>Excellence:</strong> Delivering nothing but the best.</li>
+                    </ul>
+
+                    <h2>Why Choose Us?</h2>
+                    <p>We combine deep technical expertise with strategic business acumen. Our team doesn't just write code; we solve problems. From the initial consultation to final deployment, we are your partners in growth.</p>
+                </div>
+            </section>
+
+            <section className="section" style={{ backgroundColor: 'var(--color-white)' }}>
+                <div className="container">
+                    <h2>Meet the Founder</h2>
+                    <div className="card" style={{ maxWidth: 400, textAlign: 'center' }}>
+                        <img
+                            src="/images/team/Pharrell.jpeg"
+                            alt="Pharrell Aaron Mugumya"
+                            style={{
+                                width: '100%',
+                                borderRadius: '8px',
+                                marginBottom: '15px'
+                            }}
+                        />
+                        <h3>Pharrell Aaron Mugumya</h3>
+                        <p><strong>Founder & CEO</strong></p>
+                        <p>Passionate about leveraging AI to create meaningful impact.</p>
+                    </div>
+                    <div style={{ marginTop: 20 }}>
+                        <Link to="/team" className="btn btn-outline">View Full Team</Link>
+                    </div>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default AboutPage;
+
+
+====================================================
+FILE: frontend\src\pages\ApplyPage.jsx
+====================================================
+import React from 'react';
+import HeroSection from '../components/layout/HeroSection';
+import ApplicationForm from '../components/forms/ApplicationForm';
+
+const ApplyPage = () => {
+    return (
+        <main>
+            <HeroSection
+                title="Service Application"
+                subtitle="Ready to start? Fill out the form below to apply for our services."
+            />
+
+            <section className="section">
+                <div className="container" style={{ maxWidth: 800 }}>
+                    <ApplicationForm />
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default ApplyPage;
+
+====================================================
+FILE: frontend\src\pages\BlogPage.jsx
+====================================================
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { contentService } from '../services/contentService';
+import HeroSection from '../components/layout/HeroSection';
+
+const BlogPage = () => {
+    const { data, isLoading } = useQuery({
+        queryKey: ['blog'],
+        queryFn: () => contentService.getBlogPosts(),
+    });
+
+    const posts = data?.data?.data || [];
+
+    return (
+        <main>
+            <HeroSection
+                title="Blog & Insights"
+                subtitle="Latest news, trends, and thoughts from the Junior Reactive team."
+            />
+
+            <section className="section">
+                <div className="container">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 30 }}>
+                        {isLoading ? (
+                            <p>Loading posts...</p>
+                        ) : (
+                            posts.map(post => (
+                                <div key={post.id} className="card">
+                                    <div style={{ color: 'var(--color-accent-1)', marginBottom: 10, fontSize: '0.9rem' }}>
+                                        {post.formattedDate} | {post.author}
+                                    </div>
+                                    <h3><Link to={`/blog/${post.slug}`}>{post.title}</Link></h3>
+                                    <p>{post.excerpt}</p>
+                                    <Link to={`/blog/${post.slug}`} style={{ color: 'var(--color-secondary)' }}>Read More &rarr;</Link>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default BlogPage;
+
+====================================================
+FILE: frontend\src\pages\BlogPostPage.jsx
+====================================================
+// import React from 'react';
+// import { useParams, Link } from 'react-router-dom';
+// import { useQuery } from '@tanstack/react-query';
+// import { contentService } from '../services/contentService';
+
+// const BlogPostPage = () => {
+//     const { slug } = useParams();
+//     const { data, isLoading, error } = useQuery({
+//         queryKey: ['blog', slug],
+//         queryFn: () => contentService.getBlogPostBySlug(slug),
+//     });
+
+//     const post = data?.data?.data;
+
+//     if (isLoading) return <div className="container section">Loading...</div>;
+//     if (error || !post) return (
+//         <div className="container section">
+//             <h2>Post Not Found</h2>
+//             <Link to="/blog" className="btn">Back to Blog</Link>
+//         </div>
+//     );
+
+//     return (
+//         <main>
+//             <section className="section">
+//                 <div className="container" style={{ maxWidth: 800 }}>
+//                     <Link to="/blog" style={{ marginBottom: 20, display: 'inline-block' }}>&larr; Back to Blog</Link>
+//                     <h1>{post.title}</h1>
+//                     <div style={{ color: 'gray', marginBottom: 30 }}>
+//                         <span>{post.formattedDate}</span> | <span>By {post.author}</span>
+//                     </div>
+//                     <div style={{ lineHeight: 1.8, fontSize: '1.1rem' }}>
+//                         {post.content.split('\n').map((paragraph, idx) => (
+//                             <p key={idx}>{paragraph}</p>
+//                         ))}
+//                     </div>
+//                 </div>
+//             </section>
+//         </main>
+//     );
+// };
+
+// export default BlogPostPage;
+
+====================================================
+FILE: frontend\src\pages\ContactPage.jsx
+====================================================
+import React from 'react';
+import HeroSection from '../components/layout/HeroSection';
+import ContactForm from '../components/forms/ContactForm';
+
+const ContactPage = () => {
+    return (
+        <main>
+            <HeroSection
+                title="Contact Us"
+                subtitle="We'd love to hear from you. Get in touch today."
+            />
+
+            <section className="section">
+                <div className="container">
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+                        <div>
+                            <h2>Get in Touch</h2>
+                            <p>Have a question or want to discuss a project? Fill out the form or use our contact details below.</p>
+
+                            <div style={{ marginTop: 30 }}>
+                                <p><strong>Phone:</strong> +256 764524816</p>
+                                <p><strong>Email:</strong> juniorreactive@gmail.com</p>
+                                <p><strong>Address:</strong> Kampala, Uganda</p>
+                            </div>
+                        </div>
+
+                        <ContactForm />
+                    </div>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default ContactPage;
+
+====================================================
+FILE: frontend\src\pages\FAQPage.jsx
+====================================================
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { contentService } from '../services/contentService';
+import HeroSection from '../components/layout/HeroSection';
+
+const FAQPage = () => {
+    const { data, isLoading } = useQuery({
+        queryKey: ['faqs'],
+        queryFn: () => contentService.getFAQs(),
+    });
+
+    const faqs = data?.data?.data || [];
+
+    return (
+        <main>
+            <HeroSection
+                title="Frequently Asked Questions"
+                subtitle="Find answers to common questions about our services."
+            />
+
+            <section className="section">
+                <div className="container" style={{ maxWidth: 800 }}>
+                    {isLoading ? (
+                        <p>Loading FAQs...</p>
+                    ) : (
+                        faqs.map(faq => (
+                            <div key={faq.id} style={{ marginBottom: 30 }}>
+                                <h3>{faq.question}</h3>
+                                <p>{faq.answer}</p>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default FAQPage;
+
+====================================================
+FILE: frontend\src\pages\HomePage.jsx
+====================================================
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import { contentService } from '../services/contentService';
+import HeroSection from '../components/layout/HeroSection';
+import ServicesGrid from '../components/layout/ServicesGrid';
+
+const HomePage = () => {
+    const { data: servicesData, isLoading } = useQuery({
+        queryKey: ['services'],
+        queryFn: () => contentService.getServices(),
+    });
+
+    const services = servicesData?.data?.data || [];
+
+    return (
+        <main>
+            <HeroSection
+                title="AI That Works For You"
+                subtitle="Empowering your business with intelligent solutions and robust IT infrastructure."
+                primaryBtnText="Explore Services"
+                primaryBtnLink="/services"
+                secondaryBtnText="Contact Us"
+                secondaryBtnLink="/contact"
+            />
+
+            <section className="section">
+                <div className="container">
+                    <h2>Our Core Services</h2>
+                    {isLoading ? (
+                        <p>Loading services...</p>
+                    ) : (
+                        <>
+                            <ServicesGrid services={services.slice(0, 3)} />
+                            <div style={{ textAlign: 'center', marginTop: 30 }}>
+                                <Link to="/services" className="btn btn-outline">View All Services</Link>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </section>
+
+            <section className="section" style={{ backgroundColor: 'var(--color-white)' }}>
+                <div className="container">
+                    <div style={{ display: 'flex', gap: 40, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1 }}>
+                            <h2>Who We Are</h2>
+                            <p>Junior Reactive is a premier AI and IT services provider founded by Pharrell Aaron Mugumya. We are dedicated to bridging the gap between complex technology and practical business application.</p>
+                            <Link to="/about" className="btn">Meet the Team</Link>
+                        </div>
+                        <div style={{ flex: 1, background: 'var(--color-light)', height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8 }}>
+                            <p style={{ color: 'var(--color-accent-1)' }}>[Image Placeholder: Team Collaboration]</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="section" style={{ backgroundColor: 'var(--color-accent-2)', textAlign: 'center' }}>
+                <div className="container">
+                    <h2>Ready to Transform Your Business?</h2>
+                    <p>Join the future of industry with our tailored AI solutions.</p>
+                    <Link to="/apply" className="btn">Apply for Services</Link>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default HomePage;
+
+====================================================
+FILE: frontend\src\pages\NotFoundPage.jsx
+====================================================
+import React from 'react';
+import { Link } from 'react-router-dom';
+import HeroSection from '../components/layout/HeroSection';
+
+const NotFoundPage = () => {
+    return (
+        <main>
+            <HeroSection
+                title="404 - Page Not Found"
+                subtitle="The page you are looking for doesn't exist or has been moved."
+            />
+            <section className="section" style={{ textAlign: 'center' }}>
+                <Link to="/" className="btn">Go Home</Link>
+            </section>
+        </main>
+    );
+};
+
+export default NotFoundPage;
+
+====================================================
+FILE: frontend\src\pages\PortfolioPage.jsx
+====================================================
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { contentService } from '../services/contentService';
+import HeroSection from '../components/layout/HeroSection';
+
+const PortfolioPage = () => {
+    const { data, isLoading } = useQuery({
+        queryKey: ['portfolio'],
+        queryFn: () => contentService.getPortfolioProjects(),
+    });
+
+    const projects = data?.data?.data || [];
+
+    return (
+        <main>
+            <HeroSection
+                title="Our Portfolio"
+                subtitle="See other projects we have handled."
+            />
+
+            <section className="section">
+                <div className="container">
+                    <div className="services-grid">
+                        {isLoading ? (
+                            <p>Loading projects...</p>
+                        ) : (
+                            projects.map(project => (
+                                <div key={project.id} className="card">
+                                    <div style={{ height: 200, backgroundColor: 'var(--color-light)', marginBottom: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        Image: {project.image}
+                                    </div>
+                                    <span style={{ color: 'var(--color-secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>{project.category}</span>
+                                    <h3>{project.title}</h3>
+                                    <p>{project.description}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default PortfolioPage;
+
+====================================================
+FILE: frontend\src\pages\PrivacyPage.jsx
+====================================================
+import React from 'react';
+import HeroSection from '../components/layout/HeroSection';
+
+const PrivacyPage = () => {
+    return (
+        <main>
+            <HeroSection
+                title="Privacy Policy"
+                subtitle="How we handle your data."
+            />
+
+            <section className="section">
+                <div className="container">
+                    <p>Last updated: {new Date().toLocaleDateString()}</p>
+
+                    <h3>1. Information Collection</h3>
+                    <p>We collect information you provide directly to us when you fill out a form or communicate with us.</p>
+
+                    <h3>2. Use of Information</h3>
+                    <p>We use the information we collect to provide, maintain, and improve our services, and to communicate with you.</p>
+
+                    <h3>3. Contact Us</h3>
+                    <p>If you have any questions about this Privacy Policy, please contact us at juniorreactive@gmail.com.</p>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default PrivacyPage;
+
+====================================================
+FILE: frontend\src\pages\ServiceDetailPage.jsx
+====================================================
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { contentService } from '../services/contentService';
+import HeroSection from '../components/layout/HeroSection';
+
+const ServiceDetailPage = () => {
+    const { id } = useParams();
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['service', id],
+        queryFn: () => contentService.getServiceById(id),
+    });
+
+    const service = data?.data?.data;
+
+    if (isLoading) return <div className="container section">Loading...</div>;
+    if (error || !service) return (
+        <div className="container section">
+            <h2>Service Not Found</h2>
+            <Link to="/services" className="btn">Back to Services</Link>
+        </div>
+    );
+
+    return (
+        <main>
+            <HeroSection
+                title={service.title}
+                subtitle={service.shortDescription}
+            />
+
+            <section className="section">
+                <div className="container">
+                    <div style={{ background: 'white', padding: 30, borderRadius: 8, boxShadow: 'var(--shadow-card)' }}>
+                        <h2>Service Overview</h2>
+                        <p>{service.fullDescription}</p>
+
+                        <h3 style={{ marginTop: 30 }}>Key Benefits</h3>
+                        <ul style={{ listStyle: 'disc', marginLeft: 20 }}>
+                            <li>Professional expertise</li>
+                            <li>Scalable solutions</li>
+                            <li>24/7 Support availability</li>
+                        </ul>
+
+                        <div style={{ marginTop: 40 }}>
+                            <Link to={`/apply?service=${service.title}`} className="btn">Apply for this Service</Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default ServiceDetailPage;
+
+====================================================
+FILE: frontend\src\pages\ServicesPage.jsx
+====================================================
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import { contentService } from '../services/contentService';
+import HeroSection from '../components/layout/HeroSection';
+import ServicesGrid from '../components/layout/ServicesGrid';
+
+const ServicesPage = () => {
+    const { data: servicesData, isLoading } = useQuery({
+        queryKey: ['services'],
+        queryFn: () => contentService.getServices(),
+    });
+
+    const services = servicesData?.data?.data || [];
+
+    return (
+        <main>
+            <HeroSection
+                title="Our Services"
+                subtitle="Comprehensive AI and IT solutions tailored for you."
+            />
+
+            <section className="section">
+                <div className="container">
+                    {isLoading ? (
+                        <p>Loading services...</p>
+                    ) : (
+                        <ServicesGrid services={services} />
+                    )}
+                </div>
+            </section>
+
+            <section className="section" style={{ backgroundColor: 'var(--color-white)', textAlign: 'center' }}>
+                <div className="container">
+                    <h2>Need a Custom Solution?</h2>
+                    <p>We understand that every business is unique. Let's discuss your specific needs.</p>
+                    <Link to="/apply" className="btn">Get in Touch</Link>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default ServicesPage;
+
+====================================================
+FILE: frontend\src\pages\TeamPage.jsx
+====================================================
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { contentService } from '../services/contentService';
+import HeroSection from '../components/layout/HeroSection';
+
+const TeamPage = () => {
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey: ['team'],
+        queryFn: () => contentService.getTeamMembers(),
+    });
+
+    const members = data?.data?.data || [];
+
+    if (isLoading) {
+        return (
+            <main>
+                <HeroSection
+                    title="Our Team"
+                    subtitle="The minds behind Junior Reactive."
+                />
+                <section className="section">
+                    <div className="container" style={{ textAlign: 'center' }}>
+                        <div className="loading-spinner"></div>
+                        <p>Loading team members...</p>
+                        <p style={{ color: 'var(--color-accent-1)', fontSize: '0.9rem', marginTop: '10px' }}>
+                            If this takes too long, check that the backend is running at {process.env.REACT_APP_API_URL}
+                        </p>
+                    </div>
+                </section>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main>
+                <HeroSection
+                    title="Our Team"
+                    subtitle="The minds behind Junior Reactive."
+                />
+                <section className="section">
+                    <div className="container" style={{ textAlign: 'center' }}>
+                        <div style={{ 
+                            backgroundColor: '#f8d7da', 
+                            color: '#721c24', 
+                            padding: '20px', 
+                            borderRadius: '8px',
+                            marginBottom: '20px'
+                        }}>
+                            <h3>⚠️ Error Loading Team</h3>
+                            <p>{error.message || 'Could not connect to the server'}</p>
+                            <p>Please ensure the backend is running at: {process.env.REACT_APP_API_URL}</p>
+                            <button 
+                                onClick={() => refetch()} 
+                                className="btn"
+                                style={{ marginTop: '15px' }}
+                            >
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        );
+    }
+
+    return (
+        <main>
+            <HeroSection
+                title="Our Team"
+                subtitle="The minds behind Junior Reactive."
+            />
+
+            <section className="section">
+                <div className="container">
+                    {members.length === 0 ? (
+                        <p style={{ textAlign: 'center' }}>No team members found.</p>
+                    ) : (
+                        <div className="services-grid">
+                            {members.map(member => (
+                                <div key={member.id} className="card">
+                                    <div style={{ 
+                                        height: 200, 
+                                        backgroundColor: 'var(--color-light)', 
+                                        marginBottom: 15,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '8px',
+                                        overflow: 'hidden'
+                                    }}>
+                                        {member.image ? (
+                                            <img 
+                                                src={`/images/team/${member.image}`} 
+                                                alt={member.name}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                        ) : (
+                                            <span style={{ color: 'var(--color-accent-1)' }}>No Image</span>
+                                        )}
+                                    </div>
+                                    <h3>{member.name}</h3>
+                                    <p style={{ color: 'var(--color-secondary)' }}>{member.position}</p>
+                                    <p>{member.bio}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default TeamPage;
+
+====================================================
+FILE: frontend\src\pages\TermsPage.jsx
+====================================================
+import React from 'react';
+import HeroSection from '../components/layout/HeroSection';
+
+const TermsPage = () => {
+    return (
+        <main>
+            <HeroSection
+                title="Terms of Service"
+                subtitle="Please read these terms carefully."
+            />
+
+            <section className="section">
+                <div className="container">
+                    <p>Last updated: {new Date().toLocaleDateString()}</p>
+
+                    <h3>1. Acceptance of Terms</h3>
+                    <p>By accessing our website, you agree to be bound by these Terms of Service.</p>
+
+                    <h3>2. Use of Services</h3>
+                    <p>You agree to use our services only for lawful purposes and in accordance with these Terms.</p>
+                </div>
+            </section>
+        </main>
+    );
+};
+
+export default TermsPage;
+
+====================================================
+FILE: frontend\src\assets\css\global.css
+====================================================
+@import './variables.css';
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--color-light);
+    color: var(--color-text-dark);
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.2;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+
+p { margin-bottom: var(--spacing-md); }
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.section {
+    padding: var(--spacing-xl) 0;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1rem;
+}
+
+.btn:hover {
+    background-color: var(--color-primary);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--color-secondary);
+    color: var(--color-secondary);
+}
+
+.btn-outline:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: var(--color-white);
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero h1 { color: var(--color-white); }
+.hero p { 
+    font-size: 1.25rem; 
+    max-width: 700px; 
+    margin: 0 auto var(--spacing-lg); 
+}
+
+/* Service Cards */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.card {
+    background-color: var(--color-white);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-icon {
+    font-size: 2rem;
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: bold;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-accent-1);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+}
+
+input:focus, textarea:focus {
+    outline: 2px solid var(--color-secondary);
+    border-color: transparent;
+}
+
+/* Footer */
+footer {
+    background-color: var(--color-primary);
+    color: var(--color-accent-2);
+    padding: var(--spacing-xl) 0 var(--spacing-md);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.footer-col h3 {
+    color: var(--color-white);
+    margin-bottom: var(--spacing-md);
+}
+
+.footer-col ul li {
+    margin-bottom: var(--spacing-sm);
+}
+
+.social-links li {
+    margin-bottom: 8px;
+}
+.social-links i {
+    margin-right: 8px;
+    width: 20px;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    border: 4px solid var(--color-light);
+    border-top: 4px solid var(--color-secondary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.footer-bottom {
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: var(--spacing-md);
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+    .hero { padding: 60px 0; }
+}
+
+====================================================
+FILE: frontend\src\assets\css\variables.css
+====================================================
+:root {
+    --color-primary: #1c265e;
+    --color-secondary: #5269c3;
+    --color-accent-1: #90a0da;
+    --color-accent-2: #a8ccee;
+    --color-light: #e4eaf9;
+    --color-white: #ffffff;
+    --color-text-dark: #333333;
+    --color-text-light: #f4f4f4;
+    
+    --font-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 32px;
+    --spacing-xl: 64px;
+    
+    --border-radius: 8px;
+    --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+====================================================
+FILE: frontend\src\components\common\Button.css
+====================================================
+/* Button variants */
+.btn {
+    display: inline-block;
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--color-secondary);
+    color: var(--color-secondary);
+}
+
+.btn-outline:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+}
+
+.btn-secondary {
+    background-color: var(--color-accent-1);
+    color: var(--color-text-dark);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-accent-2);
+}
+
+.btn-accent {
+    background-color: var(--color-accent-2);
+    color: var(--color-primary);
+}
+
+.btn-accent:hover {
+    background-color: var(--color-white);
+    color: var(--color-secondary);
+}
+
+.btn-full-width {
+    width: 100%;
+    display: block;
+}
+
+/* Small screens */
+@media (max-width: 768px) {
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+====================================================
+FILE: frontend\src\components\common\Chatbot.css
+====================================================
+.chatbot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* Animated chatbot button */
+.chatbot-toggle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%);
+  color: white;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  animation: pulse 2s infinite;
+}
+
+.chatbot-toggle:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  animation: none;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(82, 105, 195, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(82, 105, 195, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(82, 105, 195, 0);
+  }
+}
+
+/* Notification dot */
+.chatbot-toggle::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 12px;
+  height: 12px;
+  background-color: #ff4444;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.chatbot-window {
+  position: absolute;
+  bottom: 90px;
+  right: 0;
+  width: 350px;
+  height: 500px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+  border: 1px solid rgba(82, 105, 195, 0.2);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chatbot-header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+.chatbot-header span::before {
+  content: '🤖';
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+
+.chatbot-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.chatbot-header button:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+.chatbot-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(255,255,255,0.9);
+}
+
+.message {
+  max-width: 80%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  animation: messageAppear 0.3s ease;
+  line-height: 1.4;
+  position: relative;
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--color-accent-1) 0%, var(--color-secondary) 100%);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message.bot {
+  align-self: flex-start;
+  background: var(--color-light);
+  color: var(--color-text-dark);
+  border-bottom-left-radius: 4px;
+}
+
+.message.bot::before {
+  content: '🤖';
+  position: absolute;
+  left: -25px;
+  bottom: 0;
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+.chatbot-input {
+  display: flex;
+  border-top: 2px solid var(--color-accent-1);
+  padding: 15px;
+  background: white;
+  gap: 10px;
+}
+
+.chatbot-input input {
+  flex: 1;
+  border: 2px solid var(--color-light);
+  border-radius: 25px;
+  padding: 12px 18px;
+  outline: none;
+  font-size: 0.95rem;
+  transition: all 0.3s;
+}
+
+.chatbot-input input:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(82, 105, 195, 0.1);
+}
+
+.chatbot-input button {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-primary) 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 25px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.chatbot-input button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.chatbot-input button:active {
+  transform: translateY(0);
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  gap: 5px;
+  padding: 10px 15px;
+  background: var(--color-light);
+  border-radius: 18px;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-secondary);
+  border-radius: 50%;
+  animation: typing 1.4s infinite;
+  opacity: 0.7;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .chatbot-toggle {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+
+  .chatbot-window {
+    width: 300px;
+    height: 450px;
+    bottom: 80px;
+  }
+
+  .message.bot::before {
+    display: none;
+  }
+}
+
+====================================================
+FILE: frontend\src\components\common\Header.css
+====================================================
+/* Header specific styles */
+header {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    padding: 10px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    height: 60px;
+}
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.logo-img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-accent-2);
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.logo-text span {
+    color: var(--color-white);
+}
+
+nav ul {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+nav a {
+    color: var(--color-accent-2);
+    font-weight: 500;
+}
+
+nav a:hover,
+nav a.active {
+    color: var(--color-white);
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--color-white);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    nav ul {
+        display: none;
+    }
+    
+    nav ul.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: var(--color-primary);
+        padding: 20px;
+        z-index: 999;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+}
+
+====================================================
+FILE: frontend\public\manifest.json
+====================================================
+{
+  "short_name": "JR",
+  "name": "Junior Reactive",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1c265e",
+  "background_color": "#ffffff"
+}
+
+====================================================
+FILE: frontend\package-lock.json
+====================================================
+Content omitted (large file)
+
+====================================================
+FILE: frontend\package.json
+====================================================
+{
+  "name": "jr-website-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.15.0",
+    "axios": "^1.5.0",
+    "@tanstack/react-query": "^4.35.0",
+    "react-scripts": "5.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": ["react-app"]
+  },
+  "browserslist": {
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+  }
+}
+
+====================================================
+FILE: frontend\.env
+====================================================
+REACT_APP_API_URL=http://localhost:5005/api
+
+====================================================
+FILE: frontend\.env.example
+====================================================
+REACT_APP_API_URL=http://localhost:5005/api
+
+====================================================
+FILE: generate.ps1
+====================================================
+$root = "D:\JR.React"
+$outputFile = "$root\project_dump.txt"
+$date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+# Function to get folder tree (similar to tree command)
+function Get-FolderTree {
+    param([string]$Path, [string]$Indent = "")
+    $items = Get-ChildItem -Path $Path | Sort-Object { $_.PSIsContainer } -Descending
+    foreach ($item in $items) {
+        $line = "$Indent+-- $($item.Name)"
+        if ($item.PSIsContainer) {
+            $line = "$Indent+-- $($item.Name)\"
+        }
+        $line
+        if ($item.PSIsContainer) {
+            Get-FolderTree -Path $item.FullName -Indent "$Indent    "
+        }
+    }
+}
+
+# Start writing output
+"============================================================" | Out-File -FilePath $outputFile -Encoding UTF8
+"JUNIOR REACTIVE PROJECT - COMPLETE CODE DUMP" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+"Generated: $date" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+"Root: $root" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+"============================================================" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+"" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+
+# Folder structure
+"============================================================" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+"FOLDER STRUCTURE" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+"============================================================" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+Get-FolderTree -Path $root | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+"" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+
+# File contents
+$extensions = @("*.js", "*.jsx", "*.css", "*.html", "*.json", "*.md", "*.ps1", "*.bat", "*.sql", "*.txt", "*.env*", "*.gitignore", "*.example")
+$files = Get-ChildItem -Path $root -Recurse -File | Where-Object {
+    $include = $false
+    foreach ($ext in $extensions) {
+        if ($_.Name -like $ext) { $include = $true; break }
+    }
+    # Exclude common binary/image files
+    $excludeExts = @("*.png", "*.jpg", "*.jpeg", "*.gif", "*.ico", "*.zip", "*.exe", "*.dll")
+    foreach ($ex in $excludeExts) {
+        if ($_.Name -like $ex) { $include = $false; break }
+    }
+    $include
+}
+
+foreach ($file in $files) {
+    $relativePath = $file.FullName.Substring($root.Length + 1)
+    "============================================================" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+    "FILE: $relativePath" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+    "============================================================" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+    try {
+        Get-Content -Path $file.FullName -Raw -Encoding UTF8 | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+    } catch {
+        "Error reading file: $_" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+    }
+    "" | Out-File -FilePath $outputFile -Encoding UTF8 -Append
+}
+
+Write-Host "✅ Project dump created at: $outputFile" -ForegroundColor Green
+
+====================================================
+FILE: Start.bat
+====================================================
+@echo off
+echo 🚀 Starting Junior React Application...
+cd /d D:\JR.React\backend
+start powershell -NoExit -Command "node server-fixed.js"
+timeout /t 3 /nobreak
+cd /d D:\JR.React\frontend
+start powershell -NoExit -Command "npm start"
+timeout /t 8 /nobreak
+start http://localhost:3000
+echo ✅ Application started!
+
+====================================================
+FILE: README.md
+====================================================
+# Junior Reactive Website
+
+## 🚀 Project Overview
+Modern full-stack website for Junior Reactive, an AI and IT solutions provider. Built with React, Node.js, Express, and Microsoft SQL Server.
+
+## 📁 Project Structure
+- **/backend** - Node.js/Express API with Swagger documentation
+- **/frontend** - React application with all pages and components
+- **/database** - SQL scripts for database setup
+
+## 🎨 Brand Colors
+- Primary Blue: #1c265e
+- Secondary Blue: #5269c3
+- Accent 1: #90a0da
+- Accent 2: #a8ccee
+- Light Background: #e4eaf9
+
+## 🔧 Prerequisites
+- Node.js v20+
+- Microsoft SQL Server (local or cloud)
+- npm or yarn
+
+## 🚦 Quick Start
+
+### Backend
+```bash
+cd backend
+npm install
+cp .env.example .env   # Edit with your database credentials
+node server-fixed.js
+
+====================================================
+SUMMARY
+====================================================
+Total source files dumped: 88
+Time taken: 208.5556364 seconds
+====================================================

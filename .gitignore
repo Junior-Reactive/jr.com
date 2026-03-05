@@ -65,3 +65,11 @@ frontend/public/*.png
 *.mdf
 *.ldf
 *.bak
+
+
+structure_only.txt
+Start.bat
+setup-autostart.ps1
+seed-database.sql
+project_dump_optimized.txt
+generate.ps1

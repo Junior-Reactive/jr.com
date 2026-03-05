@@ -1,52 +1,93 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+// ScrollLink: navigates to a route AND scrolls to top
+const ScrollLink = ({ to, children, ...props }) => {
+    const navigate = useNavigate();
+    const handleClick = (e) => {
+        e.preventDefault();
+        navigate(to);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    return <a href={to} onClick={handleClick} {...props}>{children}</a>;
+};
 
 const Footer = () => {
-    const currentYear = new Date().getFullYear();
+    const year = new Date().getFullYear();
 
     return (
         <footer>
             <div className="container">
                 <div className="footer-grid">
+                    {/* Brand */}
                     <div className="footer-col">
-                        <h3>Junior Reactive</h3>
-                        <p>AI that works for you. Empowering businesses with cutting-edge technology solutions.</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                            <img src="/logo.png" alt="Junior Reactive" style={{ height: 36 }} onError={e => e.target.style.display = 'none'} />
+                            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', color: 'white' }}>
+                                Junior <span style={{ color: 'rgba(255,255,255,.45)' }}>Reactive</span>
+                            </span>
+                        </div>
+                        <p>AI that works for you. Empowering businesses across East Africa with cutting-edge technology solutions.</p>
+                        <div className="social-links" style={{ marginTop: 20 }}>
+                            <a href="https://wa.me/256764524816" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="WhatsApp">
+                                <i className="fab fa-whatsapp" />
+                            </a>
+                            <a href="https://instagram.com/juniorreactive" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Instagram">
+                                <i className="fab fa-instagram" />
+                            </a>
+                            <a href="https://tiktok.com/@juniorreactive" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="TikTok">
+                                <i className="fab fa-tiktok" />
+                            </a>
+                        </div>
                     </div>
+
+                    {/* Services */}
                     <div className="footer-col">
-                        <h3>Quick Links</h3>
+                        <h3>Services</h3>
                         <ul>
-                            <li><Link to="/services">Services</Link></li>
-                            <li><Link to="/portfolio">Portfolio</Link></li>
-                            <li><Link to="/apply">Apply for Services</Link></li>
-                            <li><Link to="/faq">FAQ</Link></li>
+                            <li><ScrollLink to="/services">All Services</ScrollLink></li>
+                            <li><ScrollLink to="/services/n8n-automation">N8N Automation</ScrollLink></li>
+                            <li><ScrollLink to="/services/ai-consulting">AI Consulting</ScrollLink></li>
+                            <li><ScrollLink to="/services/ai-courses">AI Courses</ScrollLink></li>
+                            <li><ScrollLink to="/apply">Apply Now</ScrollLink></li>
                         </ul>
                     </div>
+
+                    {/* Company */}
+                    <div className="footer-col">
+                        <h3>Company</h3>
+                        <ul>
+                            <li><ScrollLink to="/about">About Us</ScrollLink></li>
+                            <li><ScrollLink to="/team">Our Team</ScrollLink></li>
+                            <li><ScrollLink to="/portfolio">Portfolio</ScrollLink></li>
+                            <li><ScrollLink to="/blog">Blog</ScrollLink></li>
+                            <li><ScrollLink to="/faq">FAQ</ScrollLink></li>
+                        </ul>
+                    </div>
+
+                    {/* Contact & Legal */}
                     <div className="footer-col">
                         <h3>Contact</h3>
                         <ul>
-                            <li> +256 764524816</li>
-                            <li> Kampala, Uganda</li>
-                            <li> juniorreactive@gmail.com</li>
+                            <li style={{ color: 'rgba(255,255,255,.55)', fontSize: '.9rem', marginBottom: 8 }}>
+                                <a href="tel:+256764524816" style={{ color: 'rgba(255,255,255,.55)' }}>📞 +256 764 524 816</a>
+                            </li>
+                            <li style={{ color: 'rgba(255,255,255,.55)', fontSize: '.9rem', marginBottom: 8 }}>
+                                <a href="mailto:juniorreactive@gmail.com" style={{ color: 'rgba(255,255,255,.55)' }}>✉️ juniorreactive@gmail.com</a>
+                            </li>
+                            <li style={{ color: 'rgba(255,255,255,.55)', fontSize: '.9rem', marginBottom: 16 }}>
+                                📍 Kampala, Uganda
+                            </li>
                         </ul>
-                    </div>
-                    <div className="footer-col">
-                        <h3>Follow Us</h3>
-                        <ul className="social-links">
-                            <li><a href="https://wa.me/256764524816" target="_blank" rel="noopener noreferrer"><i className="fab fa-whatsapp"></i> WhatsApp</a></li>
-                            <li><a href="https://instagram.com/juniorreactive" target="_blank" rel="noopener noreferrer"><i className="fab fa-instagram"></i> Instagram</a></li>
-                            <li><a href="https://tiktok.com/@juniorreactive" target="_blank" rel="noopener noreferrer"><i className="fab fa-tiktok"></i> TikTok</a></li>
-                        </ul>
-                    </div>
-                    <div className="footer-col">
-                        <h3>Legal</h3>
                         <ul>
-                            <li><Link to="/privacy">Privacy Policy</Link></li>
-                            <li><Link to="/terms">Terms of Service</Link></li>
+                            <li><ScrollLink to="/privacy">Privacy Policy</ScrollLink></li>
+                            <li><ScrollLink to="/terms">Terms of Service</ScrollLink></li>
                         </ul>
                     </div>
                 </div>
+
                 <div className="footer-bottom">
-                    <p>&copy; {currentYear} Junior Reactive. All rights reserved.</p>
+                    <span>© {year} Junior Reactive Ltd. All rights reserved.</span>
                 </div>
             </div>
         </footer>

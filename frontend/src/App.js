@@ -43,8 +43,8 @@ function App() {
                     <Route path="/portfolio" element={<PortfolioPage />} />
                     <Route path="/team" element={<TeamPage />} />
                     <Route path="/faq" element={<FAQPage />} />
-                    <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
                 <Footer />

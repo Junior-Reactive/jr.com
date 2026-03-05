@@ -1,43 +1,29 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+// Port 5005 is the permanent development API port.
+// Update REACT_APP_API_URL in .env when deploying to production.
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5005/api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    timeout: 10000, // 10 second timeout
+    headers: { 'Content-Type': 'application/json' },
+    timeout: 12000,
 });
 
-// Request interceptor
 api.interceptors.request.use(
-    (config) => {
-        console.log(`🚀 Making ${config.method.toUpperCase()} request to ${config.url}`);
-        return config;
-    },
-    (error) => {
-        console.error('Request error:', error);
-        return Promise.reject(error);
-    }
+    (config) => config,
+    (error) => Promise.reject(error)
 );
 
-// Response interceptor
 api.interceptors.response.use(
-    (response) => {
-        console.log('✅ Response received:', response.data);
-        return response;
-    },
+    (response) => response,
     (error) => {
         if (error.code === 'ECONNABORTED') {
-            console.error('❌ Request timeout - backend may be down');
-        } else if (error.response) {
-            console.error('❌ Server responded with error:', error.response.status, error.response.data);
-        } else if (error.request) {
-            console.error('❌ No response received - backend may be down or CORS issue');
-            console.error('   Make sure backend is running on:', API_BASE_URL);
+            error.userMessage = 'Request timed out. The server may be slow — please try again.';
+        } else if (!error.response) {
+            error.userMessage = `Cannot reach the API at ${API_BASE_URL}. Make sure the backend is running on port 5005.`;
         } else {
-            console.error('❌ Error setting up request:', error.message);
+            error.userMessage = error.response?.data?.error || `Server error (${error.response.status})`;
         }
         return Promise.reject(error);
     }
