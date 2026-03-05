@@ -53,3 +53,5 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 Start-ScheduledTask -TaskName "JR-Backend"
 Start-ScheduledTask -TaskName "JR-Frontend"
+
+zjag vued rlsk alxm

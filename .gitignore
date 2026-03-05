@@ -67,9 +67,10 @@ frontend/public/*.png
 *.bak
 
 
-structure_only.txt
-Start.bat
-setup-autostart.ps1
-seed-database.sql
-project_dump_optimized.txt
-generate.ps1
+D:\JR.React\structure_only.txt
+D:\JR.React\Start.bat
+D:\JR.React\setup-autostart.ps1
+D:\JR.React\seed-database.sql
+D:\JR.React\seed-database.sql
+D:\JR.React\project_dump_optimized.txt
+D:\JR.React\1.txt
