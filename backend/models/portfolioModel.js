@@ -2,19 +2,13 @@ const { getPool } = require('../config/db');
 
 async function getAllProjects() {
     const pool = getPool();
-    const result = await pool.request()
-        .query(`
-            SELECT 
-                ProjectID as id,
-                Slug as slug,
-                Title as title,
-                Category as category,
-                Description as description,
-                ImageFileName as image
-            FROM PortfolioProjects 
-            ORDER BY ProjectID
-        `);
-    return result.recordset;
+    const result = await pool.query(
+        `SELECT project_id AS id, slug, title, category,
+                description, image_filename AS image
+         FROM portfolio_projects
+         ORDER BY project_id`
+    );
+    return result.rows;
 }
 
 module.exports = { getAllProjects };

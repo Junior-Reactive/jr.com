@@ -1,19 +1,14 @@
 const { getPool } = require('../config/db');
 
-async function getAllMembers() {
+async function getAllTeamMembers() {
     const pool = getPool();
-    const result = await pool.request()
-        .query(`
-            SELECT 
-                MemberID as id,
-                Name as name,
-                Position as position,
-                Bio as bio,
-                ImageFileName as image
-            FROM TeamMembers 
-            ORDER BY DisplayOrder
-        `);
-    return result.recordset;
+    const result = await pool.query(
+        `SELECT member_id AS id, name, position, bio,
+                image_filename AS image
+         FROM team_members
+         ORDER BY display_order`
+    );
+    return result.rows;
 }
 
-module.exports = { getAllMembers };
+module.exports = { getAllTeamMembers };
