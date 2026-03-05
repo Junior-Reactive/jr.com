@@ -1,10 +1,9 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { contentService } from '../services/contentService';
 import HeroSection from '../components/layout/HeroSection';
 import { SkeletonGrid } from '../components/common/SkeletonLoader';
-import ErrorState from '../components/common/ErrorState';
 
 const STATS = [
     { number: '50+', label: 'Projects Delivered' },
@@ -38,8 +37,6 @@ const WHY_US = [
 ];
 
 const HomePage = () => {
-    const navigate = useNavigate();
-
     const { data, isLoading, isError, refetch } = useQuery({
         queryKey: ['services'],
         queryFn: () => contentService.getServices(),
@@ -49,7 +46,6 @@ const HomePage = () => {
 
     const services = data?.data?.data || data?.data || [];
     const displayServices = services.length > 0 ? services.slice(0, 3) : FALLBACK_SERVICES;
-    const usingFallback = services.length === 0;
 
     return (
         <main>

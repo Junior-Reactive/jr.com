@@ -106,7 +106,6 @@ const QUICK_ROUTES = {
   'Apply for a Service':   '/apply',
   'Apply for Analytics':   '/apply',
   'Apply for N8N':         '/apply?service=N8N+Workflow+Automation',
-  'Apply Now':             '/apply',
   'Apply for a Project':   '/apply',
   'Apply for Cloud':       '/apply?service=Cloud+Solutions',
   'Contact Us':            '/contact',
@@ -180,10 +179,7 @@ export default function Chatbot() {
     addBotMessage(match.response, match.quick);
   }, [input, addBotMessage]);
 
-  const handleQuick = useCallback((label) => {
-    if (QUICK_ROUTES[label]) return; // handled by Link
-    handleSend(label);
-  }, [handleSend]);
+
 
   const handleKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
