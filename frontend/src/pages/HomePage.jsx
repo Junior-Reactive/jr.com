@@ -6,17 +6,22 @@ import HeroSection from '../components/layout/HeroSection';
 import { SkeletonGrid } from '../components/common/SkeletonLoader';
 
 const STATS = [
-    { number: '50+', label: 'Projects Delivered' },
-    { number: '30+', label: 'Happy Clients' },
-    { number: '9',   label: 'Core Services' },
+    { number: '50+',  label: 'Projects Delivered' },
+    { number: '30+',  label: 'Happy Clients' },
+    { number: '9',    label: 'Core Services' },
     { number: '100%', label: 'Client Satisfaction' },
 ];
 
-// Shown if DB is offline, so the page is never completely empty
 const FALLBACK_SERVICES = [
-    { id: 1, key: 'n8n-automation',   icon: '⚡', title: 'N8N Workflow Automation',      shortDescription: 'Connect your tools and automate repetitive processes with powerful visual N8N workflows.' },
-    { id: 2, key: 'ai-consulting',    icon: '🧠', title: 'AI Consulting',                 shortDescription: 'Strategic AI roadmaps that turn business challenges into intelligent, automated solutions.' },
-    { id: 3, key: 'ai-courses',       icon: '📚', title: 'AI Courses & Training',         shortDescription: 'Structured, practical AI education programmes for individuals and corporate teams.' },
+    { id: 1, key: 'n8n-automation', icon: '⚡', title: 'N8N Workflow Automation',  shortDescription: 'Connect your tools and automate repetitive processes with powerful visual N8N workflows.' },
+    { id: 2, key: 'ai-consulting',  icon: '🧠', title: 'AI Consulting',              shortDescription: 'Strategic AI roadmaps that turn business challenges into intelligent, automated solutions.' },
+    { id: 3, key: 'ai-courses',     icon: '📚', title: 'AI Courses & Training',      shortDescription: 'Structured, practical AI education programmes for individuals and corporate teams.' },
+];
+
+const WHY_US = [
+    { icon: '🧠', title: 'AI-First Approach',    desc: "Every solution we build leverages the latest AI capabilities — not as a buzzword, but as genuine business value." },
+    { icon: '🔧', title: 'End-to-End Ownership', desc: "We stay with you from strategy through deployment and beyond. Your success is our metric." },
+    { icon: '🌍', title: 'Built for Africa',     desc: "Deep understanding of East African business environments means solutions that actually work in the real world." },
 ];
 
 const ServiceCard = ({ service }) => (
@@ -24,17 +29,38 @@ const ServiceCard = ({ service }) => (
         <div className="card-icon">{service.icon}</div>
         <h3 style={{ marginBottom: 10, fontSize: '1.1rem' }}>{service.title}</h3>
         <p style={{ fontSize: '.875rem', flex: 1 }}>{service.shortDescription}</p>
-        <Link to={`/services/${service.key}`} style={{ display:'inline-flex',alignItems:'center',gap:6,color:'var(--color-secondary)',fontWeight:700,fontSize:'.875rem',marginTop:12 }}>
+        <Link to={`/services/${service.key}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--color-secondary)', fontWeight: 700, fontSize: '.875rem', marginTop: 12 }}>
             Learn More →
         </Link>
     </div>
 );
 
-const WHY_US = [
-    { icon: '🧠', title: 'AI-First Approach', desc: "Every solution we build leverages the latest AI capabilities — not as a buzzword, but as genuine business value." },
-    { icon: '🔧', title: 'End-to-End Ownership', desc: "We stay with you from strategy through deployment and beyond. Your success is our metric." },
-    { icon: '🌍', title: 'Built for Africa', desc: "Deep understanding of East African business environments means solutions that actually work in the real world." },
-];
+// CEO photo with beautiful gradient-avatar fallback
+const CEOPhoto = () => {
+    const [imgOk, setImgOk] = React.useState(true);
+    return (
+        <div className="ceo-photo-wrapper">
+            {imgOk ? (
+                <img
+                    src="/images/team/Pharrell.jpeg"
+                    alt="Pharrell Aaron Mugumya — Founder & CEO"
+                    className="ceo-photo"
+                    onError={() => setImgOk(false)}
+                />
+            ) : (
+                <div className="ceo-avatar-fallback">
+                    <span className="ceo-avatar-initials">PM</span>
+                    <span className="ceo-avatar-name">Pharrell Mugumya</span>
+                    <span className="ceo-avatar-title">Founder &amp; CEO</span>
+                </div>
+            )}
+            <div className="ceo-badge">
+                <span className="ceo-badge-dot" />
+                Founder &amp; CEO
+            </div>
+        </div>
+    );
+};
 
 const HomePage = () => {
     const { data, isLoading, isError, refetch } = useQuery({
@@ -71,7 +97,7 @@ const HomePage = () => {
                 </div>
             </div>
 
-            {/* Services Preview */}
+            {/* Services */}
             <section className="section">
                 <div className="container">
                     <div className="section-header">
@@ -79,21 +105,20 @@ const HomePage = () => {
                         <h2 className="section-title">Our Core Services</h2>
                         <p className="section-sub">From strategy to deployment — end-to-end AI and IT solutions tailored to your business.</p>
                     </div>
-
                     {isLoading ? (
                         <SkeletonGrid count={3} />
                     ) : (
                         <>
                             {isError && (
-                                <div style={{ background:'rgba(239,68,68,.06)',border:'1px solid rgba(239,68,68,.2)',borderRadius:'var(--radius-md)',padding:'10px 16px',marginBottom:24,fontSize:'.85rem',color:'#7f1d1d',display:'flex',gap:8,alignItems:'center' }}>
+                                <div style={{ background: 'rgba(239,68,68,.06)', border: '1px solid rgba(239,68,68,.2)', borderRadius: 'var(--radius-md)', padding: '10px 16px', marginBottom: 24, fontSize: '.85rem', color: '#7f1d1d', display: 'flex', gap: 8, alignItems: 'center' }}>
                                     <span>⚠️</span>
-                                    <span>Could not connect to the backend. Showing default services. <button onClick={refetch} style={{background:'none',border:'none',color:'var(--color-secondary)',fontWeight:700,cursor:'pointer',padding:0}}>Retry</button></span>
+                                    <span>Could not connect to the backend. Showing default services. <button onClick={refetch} style={{ background: 'none', border: 'none', color: 'var(--color-secondary)', fontWeight: 700, cursor: 'pointer', padding: 0 }}>Retry</button></span>
                                 </div>
                             )}
                             <div className="services-grid">
                                 {displayServices.map(s => <ServiceCard key={s.id} service={s} />)}
                             </div>
-                            <div style={{ textAlign:'center', marginTop: 40 }}>
+                            <div style={{ textAlign: 'center', marginTop: 40 }}>
                                 <Link to="/services" className="btn btn-outline">View All 9 Services →</Link>
                             </div>
                         </>
@@ -102,27 +127,20 @@ const HomePage = () => {
             </section>
 
             {/* Who We Are */}
-            <section className="section" style={{ background:'var(--color-white)' }}>
+            <section className="section" style={{ background: 'var(--color-white)' }}>
                 <div className="container">
-                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:64, alignItems:'center' }}>
-                        <div>
+                    <div className="about-grid">
+                        <div className="about-text">
                             <div className="section-label">About Us</div>
-                            <h2 style={{ marginTop:12 }}>Bridging Technology &amp; Business</h2>
+                            <h2 style={{ marginTop: 12 }}>Bridging Technology &amp; Business</h2>
                             <p>Junior Reactive is a premier AI and IT services provider founded by Pharrell Aaron Mugumya. We make cutting-edge technology accessible and practical for businesses of all sizes.</p>
                             <p>From initial consultation to final deployment, we are your strategic technology partners — combining deep technical expertise with real-world business acumen.</p>
-                            <div style={{ display:'flex', gap:16, marginTop:32, flexWrap:'wrap' }}>
+                            <div style={{ display: 'flex', gap: 16, marginTop: 32, flexWrap: 'wrap' }}>
                                 <Link to="/about" className="btn">Meet the Team</Link>
                                 <Link to="/portfolio" className="btn btn-ghost">View Portfolio</Link>
                             </div>
                         </div>
-                        <div style={{ background:'var(--gradient-light)', borderRadius:'var(--radius-xl)', height:360, display:'flex', alignItems:'center', justifyContent:'center', border:'1px solid var(--color-border)', overflow:'hidden', position:'relative' }}>
-                            <img
-                                src="/images/team/Pharrell.jpeg"
-                                alt="Pharrell Aaron Mugumya — Founder"
-                                style={{ width:'100%', height:'100%', objectFit:'cover' }}
-                                onError={e => { e.target.style.display='none'; }}
-                            />
-                        </div>
+                        <CEOPhoto />
                     </div>
                 </div>
             </section>
@@ -139,30 +157,22 @@ const HomePage = () => {
                             <div className="card" key={item.title}>
                                 <div className="card-icon">{item.icon}</div>
                                 <h3>{item.title}</h3>
-                                <p style={{ fontSize:'.9rem' }}>{item.desc}</p>
+                                <p style={{ fontSize: '.9rem' }}>{item.desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* CTA — fully functional buttons using navigate */}
+            {/* CTA */}
             <section className="section">
                 <div className="container">
                     <div className="cta-band">
                         <h2>Ready to Transform Your Business?</h2>
                         <p>Join forward-thinking companies already leveraging our AI solutions.</p>
-                        <div style={{ display:'flex', gap:16, justifyContent:'center', flexWrap:'wrap', position:'relative' }}>
-                            <Link to="/apply" className="btn">
-                                Apply for Services
-                            </Link>
-                            <Link
-                                to="/faq"
-                                className="btn"
-                                style={{ background:'transparent', border:'2px solid rgba(255,255,255,.45)', color:'white', boxShadow:'none' }}
-                            >
-                                View FAQs
-                            </Link>
+                        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <Link to="/apply" className="btn">Apply for Services</Link>
+                            <Link to="/faq" className="btn" style={{ background: 'transparent', border: '2px solid rgba(255,255,255,.45)', color: 'white', boxShadow: 'none' }}>View FAQs</Link>
                         </div>
                     </div>
                 </div>

@@ -22,7 +22,7 @@ const Footer = () => {
                     {/* Brand */}
                     <div className="footer-col">
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                            <img src="/logo.png" alt="Junior Reactive" style={{ height: 36 }} onError={e => e.target.style.display = 'none'} />
+                            <img src="/logo192.png" alt="Junior Reactive" style={{ height: 36, width: 36, objectFit: 'contain', borderRadius: 6 }} onError={e => e.target.style.display = 'none'} />
                             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', color: 'white' }}>
                                 Junior <span style={{ color: 'rgba(255,255,255,.45)' }}>Reactive</span>
                             </span>
