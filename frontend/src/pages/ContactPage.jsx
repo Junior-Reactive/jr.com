@@ -1,86 +1,173 @@
-import React from 'react';
-import HeroSection from '../components/layout/HeroSection';
-import ContactForm from '../components/forms/ContactForm';
+import React, { useState } from 'react';
+import { submissionService } from '../services/submissionService';
 
-const INFO = [
-    { icon: '📞', label: 'Phone', value: '+256 764 524 816', href: 'tel:+256764524816' },
+const CONTACT_DETAILS = [
+    { icon: '📞', label: 'Phone / WhatsApp', value: '+256 764 524 816', href: 'tel:+256764524816' },
     { icon: '✉️', label: 'Email', value: 'juniorreactive@gmail.com', href: 'mailto:juniorreactive@gmail.com' },
     { icon: '📍', label: 'Location', value: 'Kampala, Uganda', href: null },
-    { icon: '💬', label: 'WhatsApp', value: 'Chat with us', href: 'https://wa.me/256764524816' },
+    { icon: '🕒', label: 'Response Time', value: 'Within 24 hours', href: null },
 ];
 
-const ContactPage = () => (
-    <main>
-        <HeroSection
-            badge="Get in Touch"
-            title="Contact Us"
-            subtitle="Have a question or want to discuss a project? We'd love to hear from you."
-        />
+const ContactPage = () => {
+    const [form, setForm]       = useState({ name: '', email: '', subject: '', message: '' });
+    const [status, setStatus]   = useState(null); // 'loading' | 'success' | 'error'
+    const [errMsg, setErrMsg]   = useState('');
 
-        <section className="section">
-            <div className="container">
-                {/* Responsive contact grid */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'clamp(280px, 40%, 420px) 1fr',
-                    gap: 48,
-                    alignItems: 'start',
-                }}>
-                    {/* Left — info */}
-                    <div>
-                        <h2 style={{ marginBottom: 8 }}>Let's Talk</h2>
-                        <p style={{ marginBottom: 32 }}>
-                            Whether you're ready to start a project or just exploring options — we're here to help. Fill out the form or reach us directly.
-                        </p>
+    const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            {INFO.map((item) => (
-                                <div key={item.label} style={{
-                                    display: 'flex', gap: 14, alignItems: 'flex-start',
-                                    padding: '16px 18px', background: 'var(--color-white)',
-                                    borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)',
-                                    boxShadow: 'var(--shadow-xs)',
-                                }}>
-                                    <span style={{
-                                        fontSize: '1.25rem', width: 40, height: 40,
-                                        background: 'var(--gradient-light)', borderRadius: 8,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    }}>
-                                        {item.icon}
-                                    </span>
-                                    <div>
-                                        <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-light)', margin: 0 }}>
-                                            {item.label}
-                                        </p>
-                                        {item.href ? (
-                                            <a href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer"
-                                                style={{ color: 'var(--color-primary)', fontWeight: 500, fontSize: '0.95rem' }}>
-                                                {item.value}
-                                            </a>
-                                        ) : (
-                                            <span style={{ color: 'var(--color-primary)', fontWeight: 500, fontSize: '0.95rem' }}>{item.value}</span>
-                                        )}
+    const handleSubmit = async e => {
+        e.preventDefault();
+        setStatus('loading');
+        setErrMsg('');
+        try {
+            await submissionService.submitContact(form);
+            setStatus('success');
+            setForm({ name: '', email: '', subject: '', message: '' });
+        } catch (err) {
+            setStatus('error');
+            setErrMsg(err?.response?.data?.error || 'Something went wrong. Please try again.');
+        }
+    };
+
+    return (
+        <main>
+            {/* Hero */}
+            <section className="hero" style={{ padding: '80px 0 70px' }}>
+                <div className="container">
+                    <div className="hero-badge">Get In Touch</div>
+                    <h1>Contact Us</h1>
+                    <p className="hero-sub">
+                        Have a question or ready to start a project? We'd love to hear from you.
+                        We respond to every message within 24 hours.
+                    </p>
+                </div>
+            </section>
+
+            {/* Contact Grid */}
+            <section className="section">
+                <div className="container">
+                    <div className="contact-grid">
+
+                        {/* ── LEFT: Details ───────────────────────── */}
+                        <div className="contact-details">
+                            <h2 style={{ marginBottom: 8 }}>Get In Touch</h2>
+                            <p style={{ marginBottom: 32 }}>
+                                Reach out through any of the channels below, or fill in the form
+                                and we'll get back to you promptly.
+                            </p>
+
+                            <div className="contact-cards">
+                                {CONTACT_DETAILS.map(item => (
+                                    <div className="contact-card" key={item.label}>
+                                        <span className="contact-card-icon">{item.icon}</span>
+                                        <div>
+                                            <div className="contact-card-label">{item.label}</div>
+                                            {item.href ? (
+                                                <a href={item.href} className="contact-card-value contact-card-link">
+                                                    {item.value}
+                                                </a>
+                                            ) : (
+                                                <div className="contact-card-value">{item.value}</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* WhatsApp CTA */}
+                            <a
+                                href="https://wa.me/256764524816?text=Hello%20Junior%20Reactive%2C%20I%20would%20like%20to%20enquire%20about%20your%20services."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn"
+                                style={{ marginTop: 32, width: '100%', justifyContent: 'center' }}
+                            >
+                                <i className="fab fa-whatsapp" style={{ fontSize: '1.1rem' }} />
+                                Chat on WhatsApp
+                            </a>
+                        </div>
+
+                        {/* ── RIGHT: Form ─────────────────────────── */}
+                        <div className="form-card contact-form-card">
+                            <h3 style={{ marginBottom: 6 }}>Send a Message</h3>
+                            <p style={{ fontSize: '.9rem', marginBottom: 24 }}>
+                                Fill in the form below and we'll be in touch within 24 hours.
+                            </p>
+
+                            {status === 'success' && (
+                                <div className="alert alert-success" style={{ marginBottom: 20 }}>
+                                    ✅ Message sent! We'll get back to you within 24 hours.
+                                </div>
+                            )}
+                            {status === 'error' && (
+                                <div className="alert alert-error" style={{ marginBottom: 20 }}>
+                                    ⚠️ {errMsg}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleSubmit}>
+                                <div className="contact-form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="name">Full Name *</label>
+                                        <input
+                                            id="name" name="name" type="text"
+                                            placeholder="Your name"
+                                            value={form.name}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="email">Email Address *</label>
+                                        <input
+                                            id="email" name="email" type="email"
+                                            placeholder="your@email.com"
+                                            value={form.email}
+                                            onChange={handleChange}
+                                            required
+                                        />
                                     </div>
                                 </div>
-                            ))}
+
+                                <div className="form-group">
+                                    <label htmlFor="subject">Subject *</label>
+                                    <input
+                                        id="subject" name="subject" type="text"
+                                        placeholder="What is this about?"
+                                        value={form.subject}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="message">Message *</label>
+                                    <textarea
+                                        id="message" name="message"
+                                        placeholder="Tell us how we can help..."
+                                        rows={5}
+                                        value={form.message}
+                                        onChange={handleChange}
+                                        required
+                                        style={{ resize: 'vertical', minHeight: 120 }}
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="btn btn-full-width"
+                                    disabled={status === 'loading'}
+                                >
+                                    {status === 'loading' ? 'Sending…' : 'Send Message →'}
+                                </button>
+                            </form>
                         </div>
+
                     </div>
-
-                    {/* Right — form */}
-                    <ContactForm />
                 </div>
-            </div>
-        </section>
-
-        {/* Responsive override */}
-        <style>{`
-            @media (max-width: 860px) {
-                .contact-grid-inner {
-                    grid-template-columns: 1fr !important;
-                }
-            }
-        `}</style>
-    </main>
-);
+            </section>
+        </main>
+    );
+};
 
 export default ContactPage;

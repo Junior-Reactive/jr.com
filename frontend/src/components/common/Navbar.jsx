@@ -80,7 +80,10 @@ const Navbar = () => {
                     <Link to="/" className="nav-brand" onClick={handleLinkClick}>
                         <JRLogo size={36} />
                         <span className="nav-brand-text">
-                            Junior <span className="nav-brand-accent">Reactive</span>
+                            <span className="brand-j">J</span>
+                            <span className="brand-full brand-full-j">unior</span>
+                            <span className="brand-r">R</span>
+                            <span className="brand-full brand-full-r">eactive</span>
                         </span>
                     </Link>
 
@@ -129,7 +132,9 @@ const Navbar = () => {
                     <Link to="/" className="nav-brand" onClick={handleLinkClick}>
                         <JRLogo size={30} />
                         <span className="nav-brand-text" style={{ color: 'white' }}>
-                            Junior <span className="nav-brand-accent">Reactive</span>
+                            <span className="brand-j">Junior</span>
+                            {' '}
+                            <span className="brand-r">Reactive</span>
                         </span>
                     </Link>
                     <button
