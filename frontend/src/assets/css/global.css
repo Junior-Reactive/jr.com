@@ -178,21 +178,40 @@ header{
 }
 header.scrolled{box-shadow:0 4px 24px rgba(0,0,0,.2);}
 .nav-container{display:flex;align-items:center;gap:var(--space-6);height:68px;}
-.nav-brand{display:flex;align-items:center;gap:6px;text-decoration:none;flex-shrink:0;}
-.nav-brand-text{font-family:var(--font-display);font-weight:800;font-size:1.1rem;color:#fff;letter-spacing:-.01em;display:flex;align-items:baseline;gap:0;}
+.nav-brand{display:flex;align-items:center;gap:3px;text-decoration:none;flex-shrink:0;}
+.nav-brand-text{
+    font-family:var(--font-display);font-weight:800;font-size:1.15rem;
+    color:#fff;letter-spacing:-.01em;
+    display:flex;align-items:baseline;gap:0;
+    margin-left:6px; /* tighter gap between logo image and text */
+}
 .nav-brand-accent{color:rgba(255,255,255,.45);}
 
-/* JR expand on hover */
-.brand-j{color:#fff;transition:color var(--transition-fast);}
-.brand-r{color:rgba(255,255,255,.45);transition:color var(--transition-fast);}
+/* ── JR expand on hover ───────────────────────── */
+/* Default: show only J and R */
+.brand-j{color:#fff;font-weight:800;}
+.brand-r{color:rgba(255,255,255,.5);font-weight:800;}
+
+/* "unior" and "eactive" collapse by default */
 .brand-full{
-    display:inline-block;max-width:0;overflow:hidden;opacity:0;
-    transition:max-width .35s cubic-bezier(.4,0,.2,1), opacity .25s ease;
-    white-space:nowrap;vertical-align:baseline;
+    display:inline-block;
+    max-width:0;
+    overflow:hidden;
+    opacity:0;
+    transition:max-width .38s cubic-bezier(.4,0,.2,1), opacity .28s ease;
+    white-space:nowrap;
+    vertical-align:baseline;
+    font-weight:800;
 }
-.nav-brand:hover .brand-full{max-width:120px;opacity:1;}
+/* Expand on hover */
+.nav-brand:hover .brand-full{max-width:140px;opacity:1;}
+
+/* Color matching: "unior" same white as J, "eactive" same muted as R */
 .brand-full-j{color:#fff;}
-.brand-full-r{color:rgba(255,255,255,.45);}
+.brand-full-r{color:rgba(255,255,255,.5);}
+
+/* Small spacing between JR block and Reactive block */
+.brand-r{margin-left:0px;}
 .nav-links{display:flex;align-items:center;gap:2px;flex:1;}
 .nav-link{padding:6px 14px;border-radius:var(--radius-full);font-family:var(--font-display);font-size:.875rem;font-weight:600;color:rgba(255,255,255,.7);transition:all var(--transition-fast);white-space:nowrap;}
 .nav-link:hover{color:#fff;background:rgba(255,255,255,.08);}
@@ -374,6 +393,7 @@ footer{background:var(--color-primary-dark);color:rgba(255,255,255,.7);padding:v
 }
 
 /* ── CONTACT PAGE ────────────────────────────────────────────── */
+/* ── Contact Page ─────────────────────────── */
 .contact-grid{
     display:grid;grid-template-columns:1fr 1.4fr;gap:var(--space-12);
     align-items:start;
@@ -395,7 +415,28 @@ footer{background:var(--color-primary-dark);color:rgba(255,255,255,.7);padding:v
 .contact-form-card{}
 .contact-form-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);}
 
+/* ── Contact Mobile: single column, form below details ── */
 @media(max-width:860px){
-    .contact-grid{grid-template-columns:1fr;gap:var(--space-8);}
+    .contact-grid{
+        grid-template-columns:1fr;
+        gap:var(--space-6);
+    }
+    /* On mobile: compact the contact cards into 2-col mini grid */
+    .contact-cards{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:var(--space-3);
+    }
+    .contact-card{
+        padding:var(--space-3) var(--space-4);
+        flex-direction:column;
+        gap:var(--space-2);
+    }
+    .contact-card-icon{font-size:1.2rem;margin-top:0;}
     .contact-form-row{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+    /* Very small phones: stack contact cards too */
+    .contact-cards{grid-template-columns:1fr;}
+    .contact-card{flex-direction:row;align-items:center;gap:var(--space-3);}
 }

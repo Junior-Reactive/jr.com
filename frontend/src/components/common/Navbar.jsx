@@ -78,12 +78,10 @@ const Navbar = () => {
 
                     {/* ── Brand ─────────────────────────────────── */}
                     <Link to="/" className="nav-brand" onClick={handleLinkClick}>
-                        <JRLogo size={36} />
+                        <JRLogo size={34} />
                         <span className="nav-brand-text">
-                            <span className="brand-j">J</span>
-                            <span className="brand-full brand-full-j">unior</span>
-                            <span className="brand-r">R</span>
-                            <span className="brand-full brand-full-r">eactive</span>
+                            <span className="brand-j">J</span><span className="brand-full brand-full-j">unior</span>
+                            <span className="brand-r"> R</span><span className="brand-full brand-full-r">eactive</span>
                         </span>
                     </Link>
 
