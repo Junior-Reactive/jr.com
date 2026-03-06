@@ -34,13 +34,13 @@ const JRLogo = ({ size = 36 }) => {
 };
 
 const NAV_LINKS = [
-    { to: '/',          label: 'Home',      exact: true },
-    { to: '/services',  label: 'Services'   },
-    { to: '/about',     label: 'About'      },
-    { to: '/team',      label: 'Team'       },
-    { to: '/portfolio', label: 'Portfolio'  },
-    { to: '/blog',      label: 'Blog'       },
-    { to: '/faq',       label: 'FAQ'        },
+    { to: '/',          label: 'Home',       exact: true },
+    { to: '/services',  label: 'Services'    },
+    { to: '/about',     label: 'About'       },
+    { to: '/portfolio', label: 'Portfolio'   },
+    { to: '/ai-tools',  label: '✦ AI Tools'  },
+    { to: '/blog',      label: 'Blog'        },
+    { to: '/contact',   label: 'Contact'     },
 ];
 
 const Navbar = () => {

@@ -11,6 +11,7 @@ dotenv.config();
 const { connectDB, getPool } = require('./config/db');
 const contentRoutes = require('./routes/contentRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
+const aiRoutes = require('./routes/aiRoutes');          // ← ADDED
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -48,7 +49,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", 'unpkg.com', 'cdn.jsdelivr.net'],
             imgSrc: ["'self'", 'data:', 'validator.swagger.io'],
             workerSrc: ["'self'", 'blob:'],
-            connectSrc: ["'self'"],
+            connectSrc: ["'self'", 'https://api.groq.com'],   // ← ADDED for Groq
         },
     },
     crossOriginEmbedderPolicy: false,
@@ -129,6 +130,7 @@ Errors return:
             { name: 'FAQs', description: 'Frequently asked questions' },
             { name: 'Contact', description: 'Contact form submissions' },
             { name: 'Applications', description: 'Service application submissions' },
+            { name: 'AI', description: 'AI-powered features — chatbot & project brief generator' },
         ],
         components: {
             schemas: {
@@ -335,6 +337,7 @@ app.get('/api/health', async (req, res) => {
 // ─── API ROUTES ───────────────────────────────────────────────────────────────
 app.use('/api', contentRoutes);
 app.use('/api', submissionRoutes);
+app.use('/api/ai', aiRoutes);              // ← ADDED — AI chatbot & brief generator
 
 // Catch unmatched /api/* routes
 app.use('/api/*', (req, res) => {
@@ -361,6 +364,8 @@ process.on('SIGINT', async () => {
         console.log(`  API:     http://localhost:${PORT}/api`);
         console.log(`  Swagger: http://localhost:${PORT}/api-docs`);
         console.log(`  Health:  http://localhost:${PORT}/api/health`);
+        console.log(`  AI Chat: http://localhost:${PORT}/api/ai/chat`);
+        console.log(`  AI Brief:http://localhost:${PORT}/api/ai/brief`);
         console.log('='.repeat(60));
     });
 })();
