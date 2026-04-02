@@ -188,8 +188,12 @@ async function replyToMessage(req, res, next) {
         });
 
         if (error) {
-            console.error('Resend error:', error);
-            return res.status(500).json({ success: false, error: 'Email failed to send. Check RESEND_API_KEY.' });
+            const detail = JSON.stringify(error);
+            console.error('Resend error:', detail);
+            return res.status(500).json({
+                success: false,
+                error: `Email send failed: ${error.message || detail}. Check RESEND_API_KEY on Render.`
+            });
         }
 
         await admin.markMessageReplied(id);

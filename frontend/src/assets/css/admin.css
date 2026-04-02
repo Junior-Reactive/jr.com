@@ -576,3 +576,9 @@
   .admin-table th:nth-child(4),
   .admin-table td:nth-child(4) { display: none; }
 }
+
+/* ── Sidebar nav sections ────────────────────────────────────── */
+.admin-nav-section { margin-bottom: 8px; }
+.admin-nav-section:last-child { margin-bottom: 0; }
+.admin-nav-item-icon { display:flex; align-items:center; flex-shrink:0; }
+.admin-nav-item-label { flex:1; }

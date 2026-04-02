@@ -22,12 +22,27 @@ const ICONS = {
     logo:         'M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5',
 };
 
-const NAV = [
-    { to: '/admin/dashboard',    label: 'Dashboard',    icon: 'dashboard'    },
-    { to: '/admin/messages',     label: 'Messages',     icon: 'messages',    badge: 'unread' },
-    { to: '/admin/applications', label: 'Applications', icon: 'applications', badge: 'new' },
-    { to: '/admin/services',     label: 'Services',     icon: 'services'     },
-    { to: '/admin/analytics',    label: 'Analytics',    icon: 'analytics'    },
+const NAV_SECTIONS = [
+    {
+        label: 'Overview',
+        items: [
+            { to: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
+            { to: '/admin/analytics', label: 'Analytics', icon: 'analytics' },
+        ],
+    },
+    {
+        label: 'Inbox',
+        items: [
+            { to: '/admin/messages',     label: 'Messages',     icon: 'messages',     badge: 'unread' },
+            { to: '/admin/applications', label: 'Applications', icon: 'applications', badge: 'new'    },
+        ],
+    },
+    {
+        label: 'Content',
+        items: [
+            { to: '/admin/services', label: 'Services', icon: 'services' },
+        ],
+    },
 ];
 
 export default function AdminLayout({ children, unreadCount = 0, newAppsCount = 0 }) {
@@ -70,22 +85,26 @@ export default function AdminLayout({ children, unreadCount = 0, newAppsCount = 
 
                 {/* Nav */}
                 <nav className="admin-nav">
-                    <div className="admin-nav-label">Main Menu</div>
-                    {NAV.map(item => {
-                        const badge = badgeFor(item.badge);
-                        return (
-                            <NavLink
-                                key={item.to}
-                                to={item.to}
-                                className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
-                                onClick={() => setSidebarOpen(false)}
-                            >
-                                <Icon d={ICONS[item.icon]} size={18} />
-                                <span>{item.label}</span>
-                                {badge && <span className="admin-nav-badge">{badge}</span>}
-                            </NavLink>
-                        );
-                    })}
+                    {NAV_SECTIONS.map(section => (
+                        <div key={section.label} className="admin-nav-section">
+                            <div className="admin-nav-label">{section.label}</div>
+                            {section.items.map(item => {
+                                const badge = badgeFor(item.badge);
+                                return (
+                                    <NavLink
+                                        key={item.to}
+                                        to={item.to}
+                                        className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+                                        onClick={() => setSidebarOpen(false)}
+                                    >
+                                        <span className="admin-nav-item-icon"><Icon d={ICONS[item.icon]} size={17} /></span>
+                                        <span className="admin-nav-item-label">{item.label}</span>
+                                        {badge && <span className="admin-nav-badge">{badge}</span>}
+                                    </NavLink>
+                                );
+                            })}
+                        </div>
+                    ))}
                 </nav>
 
                 {/* Logout */}
