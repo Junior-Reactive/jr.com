@@ -88,8 +88,20 @@ code_extractor.txt
 
 JR.React.code-workspace
 
-# ALLOW project documentation and instructions
-!CLAUDE.md
-!README.md
-!instructions/
-!docs/
+# Development-only files (keep on dev-docs-and-testing branch)
+# These files are NOT deployed to production
+CLAUDE.md
+instructions/
+docs/
+tsconfig.json
+seed-postgres.sql
+
+# Test files (run in CI/CD, not deployed)
+backend/tests/
+backend/scripts/
+backend/migrations/
+frontend/src/__tests__/
+
+# Local development
+.claude/
+.claude/worktrees/
