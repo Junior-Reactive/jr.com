@@ -25,19 +25,21 @@ const redactorOptions = {
   },
 };
 
-const logger = pino(
-  {
-    level: process.env.LOG_LEVEL || 'info',
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: process.env.NODE_ENV === 'development',
-        translateTime: 'SYS:standard',
-        ignore: 'pid,hostname',
-      },
+const pinoConfig = {
+  level: process.env.LOG_LEVEL || 'info',
+};
+
+if (process.env.NODE_ENV === 'development') {
+  pinoConfig.transport = {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+      translateTime: 'SYS:standard',
+      ignore: 'pid,hostname',
     },
-  },
-  redactorOptions,
-);
+  };
+}
+
+const logger = pino(pinoConfig, redactorOptions);
 
 module.exports = logger;

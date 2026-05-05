@@ -47,6 +47,7 @@ const NAV_SECTIONS = [
 
 export default function AdminLayout({ children, unreadCount = 0, newAppsCount = 0 }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const navigate = useNavigate();
 
     const badgeFor = (badge) => {
@@ -68,18 +69,27 @@ export default function AdminLayout({ children, unreadCount = 0, newAppsCount = 
             )}
 
             {/* ── Sidebar ── */}
-            <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
+            <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}>
                 {/* Brand */}
                 <div className="admin-sidebar-brand">
                     <div className="admin-brand-logo">
                         <span className="brand-j">J</span><span className="brand-r">R</span>
                     </div>
-                    <div>
-                        <div className="admin-brand-name">Junior Reactive</div>
-                        <div className="admin-brand-sub">Admin Panel</div>
-                    </div>
+                    {!sidebarCollapsed && (
+                        <div>
+                            <div className="admin-brand-name">Junior Reactive</div>
+                            <div className="admin-brand-sub">Admin Panel</div>
+                        </div>
+                    )}
                     <button className="admin-sidebar-close" onClick={() => setSidebarOpen(false)}>
                         <Icon d={ICONS.close} size={18} />
+                    </button>
+                    <button
+                        className="admin-sidebar-toggle"
+                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                    >
+                        <Icon d={sidebarCollapsed ? 'M9 5l7 7-7 7 M2 12h14' : 'M15 19l-7-7 7-7 M22 12H8'} size={18} />
                     </button>
                 </div>
 
@@ -87,7 +97,7 @@ export default function AdminLayout({ children, unreadCount = 0, newAppsCount = 
                 <nav className="admin-nav">
                     {NAV_SECTIONS.map(section => (
                         <div key={section.label} className="admin-nav-section">
-                            <div className="admin-nav-label">{section.label}</div>
+                            {!sidebarCollapsed && <div className="admin-nav-label">{section.label}</div>}
                             {section.items.map(item => {
                                 const badge = badgeFor(item.badge);
                                 return (
@@ -96,9 +106,10 @@ export default function AdminLayout({ children, unreadCount = 0, newAppsCount = 
                                         to={item.to}
                                         className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
                                         onClick={() => setSidebarOpen(false)}
+                                        title={sidebarCollapsed ? item.label : ''}
                                     >
                                         <span className="admin-nav-item-icon"><Icon d={ICONS[item.icon]} size={17} /></span>
-                                        <span className="admin-nav-item-label">{item.label}</span>
+                                        {!sidebarCollapsed && <span className="admin-nav-item-label">{item.label}</span>}
                                         {badge && <span className="admin-nav-badge">{badge}</span>}
                                     </NavLink>
                                 );
@@ -111,15 +122,19 @@ export default function AdminLayout({ children, unreadCount = 0, newAppsCount = 
                 <div className="admin-sidebar-footer">
                     <div className="admin-user-card">
                         <div className="admin-user-avatar">PA</div>
-                        <div className="admin-user-info">
-                            <div>Pharrell Aaron</div>
-                            <div>Administrator</div>
-                        </div>
+                        {!sidebarCollapsed && (
+                            <div className="admin-user-info">
+                                <div>Pharrell Aaron</div>
+                                <div>Administrator</div>
+                            </div>
+                        )}
                     </div>
-                    <button className="admin-logout-btn" onClick={handleLogout}>
-                        <Icon d={ICONS.logout} size={16} />
-                        Log out
-                    </button>
+                    {!sidebarCollapsed && (
+                        <button className="admin-logout-btn" onClick={handleLogout}>
+                            <Icon d={ICONS.logout} size={16} />
+                            Log out
+                        </button>
+                    )}
                 </div>
             </aside>
 
