@@ -1,6 +1,13 @@
 const { getPool } = require('../config/db');
+const cache = require('../utils/cache');
+
+const SERVICES_CACHE_KEY = 'all_services';
+const SERVICES_CACHE_TTL = 3600; // 1 hour
 
 async function getAllServices() {
+    const cached = cache.get(SERVICES_CACHE_KEY);
+    if (cached) return cached;
+
     const pool = getPool();
     const result = await pool.query(
         `SELECT service_id AS id, service_key AS key, title,
@@ -10,6 +17,8 @@ async function getAllServices() {
          FROM services
          ORDER BY service_id`
     );
+
+    cache.set(SERVICES_CACHE_KEY, result.rows, SERVICES_CACHE_TTL);
     return result.rows;
 }
 

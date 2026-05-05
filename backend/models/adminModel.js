@@ -1,4 +1,8 @@
 const { getPool } = require('../config/db');
+const cache = require('../utils/cache');
+
+const ANALYTICS_CACHE_KEY = 'admin_analytics_summary';
+const ANALYTICS_CACHE_TTL = 300; // 5 minutes
 
 // ── Dashboard Stats ───────────────────────────────────────────────────────────
 async function getDashboardStats() {
@@ -183,9 +187,12 @@ async function recordPageView({ page_path, session_id, referrer, device_type }) 
 }
 
 async function getAnalyticsSummary() {
+    const cached = cache.get(ANALYTICS_CACHE_KEY);
+    if (cached) return cached;
+
     const pool = getPool();
     const [total, today, week, chart, topPages] = await Promise.all([
-        pool.query('SELECT COUNT(*) AS total FROM page_views'),
+        pool.query("SELECT COUNT(*) AS total FROM page_views WHERE created_at >= NOW() - INTERVAL '90 days'"),
         pool.query("SELECT COUNT(*) AS total FROM page_views WHERE created_at >= CURRENT_DATE"),
         pool.query("SELECT COUNT(*) AS total FROM page_views WHERE created_at >= NOW() - INTERVAL '7 days'"),
         getPageViewsChart(),
@@ -200,7 +207,7 @@ async function getAnalyticsSummary() {
         GROUP BY device_type
     `);
 
-    return {
+    const result = {
         total:    parseInt(total.rows[0].total),
         today:    parseInt(today.rows[0].total),
         thisWeek: parseInt(week.rows[0].total),
@@ -208,6 +215,9 @@ async function getAnalyticsSummary() {
         topPages,
         devices:  devices.rows,
     };
+
+    cache.set(ANALYTICS_CACHE_KEY, result, ANALYTICS_CACHE_TTL);
+    return result;
 }
 
 // ── Admin log ─────────────────────────────────────────────────────────────────
