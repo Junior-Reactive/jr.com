@@ -87,3 +87,9 @@ code_extractor.txt
 1.txt
 
 JR.React.code-workspace
+
+# ALLOW project documentation and instructions
+!CLAUDE.md
+!README.md
+!instructions/
+!docs/
