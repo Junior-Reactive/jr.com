@@ -129,19 +129,36 @@ app.get('/api-docs.json', (req, res) => {
 });
 
 // ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'OK',
+        message: 'Junior Reactive API is running',
+        port: PORT,
+        timestamp: new Date().toISOString(),
+    });
+});
+
+// ─── DETAILED HEALTH CHECK (with database) ──────────────────────────────────────
+app.get('/api/health/detailed', async (req, res) => {
     try {
         const pool = getPool();
         await pool.query('SELECT 1 AS ping');
         res.json({
             status: 'OK',
-            message: 'Junior Reactive API is running',
+            message: 'Junior Reactive API is fully operational',
             database: 'Connected',
             port: PORT,
             timestamp: new Date().toISOString(),
         });
     } catch (err) {
-        res.status(500).json({ status: 'Error', database: 'Disconnected', error: err.message });
+        res.status(500).json({
+            status: 'Degraded',
+            message: 'API is running but database unavailable',
+            database: 'Disconnected',
+            error: err.message,
+            port: PORT,
+            timestamp: new Date().toISOString(),
+        });
     }
 });
 

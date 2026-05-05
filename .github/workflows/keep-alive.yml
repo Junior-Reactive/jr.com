@@ -14,16 +14,26 @@ jobs:
     steps:
       - name: Ping backend health endpoint
         run: |
+          # Simple health check (doesn't require database)
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --connect-timeout 5 \
             --max-time 30 \
             https://jr-backend-1edu.onrender.com/api/health)
 
           echo "Response status: $STATUS"
 
           if [ "$STATUS" = "200" ]; then
-            echo "✅ Backend is alive"
+            echo "✅ Backend is alive and responding"
+            exit 0
           else
-            echo "⚠️  Backend returned HTTP $STATUS — may be cold-starting"
-            # Don't fail the workflow — a slow cold start is expected occasionally
+            echo "⚠️  Backend returned HTTP $STATUS — attempting detailed health check"
+
+            # Detailed check (with database) - if this fails, still exit 0 for cold starts
+            DETAILED_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --connect-timeout 5 \
+              --max-time 30 \
+              https://jr-backend-1edu.onrender.com/api/health/detailed)
+
+            echo "Detailed status: $DETAILED_STATUS"
             exit 0
           fi
