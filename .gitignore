@@ -96,6 +96,11 @@ docs/
 tsconfig.json
 seed-postgres.sql
 
+# Exceptions for production-relevant documentation
+!docs/ADMIN_SECURITY_BEST_PRACTICES.md
+!COMPETITIVE_ANALYSIS.md
+!IMPROVEMENT_ROADMAP.md
+
 # Test files (run in CI/CD, not deployed)
 backend/tests/
 backend/scripts/
