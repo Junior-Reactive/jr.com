@@ -99,13 +99,20 @@ async function login(req, res) {
         return res.status(401).json({ success: false, error: 'Incorrect password.' });
     }
 
-    const token = jwt.sign({ role: 'admin', name: 'Pharrell' }, JWT_SECRET, { expiresIn: '24h' });
+    const now = Math.floor(Date.now() / 1000);
+    const token = jwt.sign({
+        role: 'admin',
+        name: 'Pharrell',
+        iat: now, // Issued at
+        sessionStart: now, // Session start for inactivity check
+    }, JWT_SECRET, { expiresIn: '8h' }); // 8 hour absolute max
 
+    // Cookie timeout: 8 hours absolute, plus inactivity check in middleware
     res.cookie('adminToken', token, {
         httpOnly:  true,
         secure:    process.env.NODE_ENV === 'production',
-        sameSite:  process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge:    24 * 60 * 60 * 1000, // 24 hours
+        sameSite:  process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax',
+        maxAge:    8 * 60 * 60 * 1000, // 8 hours
         path:      '/',
     });
 

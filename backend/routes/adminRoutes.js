@@ -2,7 +2,8 @@ const express  = require('express');
 const rateLimit = require('express-rate-limit');
 const router   = express.Router();
 const ctrl     = require('../controllers/adminController');
-const { adminAuth } = require('../middleware/adminAuth');
+const { adminAuth, csrfProtection } = require('../middleware/adminAuth');
+const { deviceAuthorization } = require('../middleware/deviceAuthorization');
 
 // ── Login rate limit: 10 attempts per 15 min ──────────────────────────────────
 const loginLimiter = rateLimit({
@@ -11,35 +12,38 @@ const loginLimiter = rateLimit({
     message: { success: false, error: 'Too many login attempts. Try again in 15 minutes.' },
 });
 
-// ── Public routes ─────────────────────────────────────────────────────────────
-router.post('/login',  loginLimiter, ctrl.login);
-router.post('/logout', ctrl.logout);
+// ── Device Authorization (first check) ────────────────────────────────────────
+// All admin routes require device/IP authorization before anything else
 
-// ── Protected routes (all require valid JWT cookie) ───────────────────────────
-router.get('/verify', adminAuth, ctrl.verify);
+// ── Public routes (device authorized, but no JWT required) ────────────────────
+router.post('/login',  deviceAuthorization, loginLimiter, ctrl.login);
+router.post('/logout', deviceAuthorization, ctrl.logout);
+
+// ── Protected routes (device authorized + valid JWT cookie) ──────────────────
+router.get('/verify', deviceAuthorization, adminAuth, ctrl.verify);
 
 // Dashboard
-router.get('/dashboard', adminAuth, ctrl.getDashboard);
+router.get('/dashboard', deviceAuthorization, adminAuth, ctrl.getDashboard);
 
 // Messages
-router.get('/messages',           adminAuth, ctrl.getMessages);
-router.get('/messages/:id',       adminAuth, ctrl.getMessage);
-router.post('/messages/:id/reply',adminAuth, ctrl.replyToMessage);
-router.patch('/messages/:id/read',adminAuth, ctrl.markRead);
-router.delete('/messages/:id',    adminAuth, ctrl.deleteMessage);
+router.get('/messages',            deviceAuthorization, adminAuth, ctrl.getMessages);
+router.get('/messages/:id',        deviceAuthorization, adminAuth, ctrl.getMessage);
+router.post('/messages/:id/reply', deviceAuthorization, adminAuth, csrfProtection, ctrl.replyToMessage);
+router.patch('/messages/:id/read', deviceAuthorization, adminAuth, csrfProtection, ctrl.markRead);
+router.delete('/messages/:id',     deviceAuthorization, adminAuth, csrfProtection, ctrl.deleteMessage);
 
 // Applications
-router.get('/applications',              adminAuth, ctrl.getApplications);
-router.get('/applications/:id',          adminAuth, ctrl.getApplication);
-router.patch('/applications/:id/status', adminAuth, ctrl.updateStatus);
-router.delete('/applications/:id',       adminAuth, ctrl.deleteApplication);
+router.get('/applications',               deviceAuthorization, adminAuth, ctrl.getApplications);
+router.get('/applications/:id',           deviceAuthorization, adminAuth, ctrl.getApplication);
+router.patch('/applications/:id/status',  deviceAuthorization, adminAuth, csrfProtection, ctrl.updateStatus);
+router.delete('/applications/:id',        deviceAuthorization, adminAuth, csrfProtection, ctrl.deleteApplication);
 
 // Services CRUD
-router.post('/services',       adminAuth, ctrl.createService);
-router.put('/services/:id',    adminAuth, ctrl.updateService);
-router.delete('/services/:id', adminAuth, ctrl.deleteService);
+router.post('/services',       deviceAuthorization, adminAuth, csrfProtection, ctrl.createService);
+router.put('/services/:id',    deviceAuthorization, adminAuth, csrfProtection, ctrl.updateService);
+router.delete('/services/:id', deviceAuthorization, adminAuth, csrfProtection, ctrl.deleteService);
 
 // Analytics
-router.get('/analytics', adminAuth, ctrl.getAnalytics);
+router.get('/analytics', deviceAuthorization, adminAuth, ctrl.getAnalytics);
 
 module.exports = router;
