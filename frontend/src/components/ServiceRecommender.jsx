@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Icon from '../assets/icons/components/Icon';
 
 // ── Quiz Questions ────────────────────────────────────────────────────────────
 const QUESTIONS = [
@@ -7,50 +8,50 @@ const QUESTIONS = [
     id: 'challenge',
     question: "What's your biggest business challenge right now?",
     options: [
-      { label: 'Too much manual/repetitive work', value: 'automation', icon: '⚙️' },
-      { label: 'Lack of data insights & reporting', value: 'data', icon: '📊' },
-      { label: 'Want to build a digital product', value: 'software', icon: '💻' },
-      { label: 'Need to understand & adopt AI', value: 'training', icon: '🧠' },
+      { label: 'Too much manual/repetitive work', value: 'automation', icon: 'service-automation', iconSize: 'md' },
+      { label: 'Lack of data insights & reporting', value: 'data', icon: 'service-analytics', iconSize: 'md' },
+      { label: 'Want to build a digital product', value: 'software', icon: 'service-dev', iconSize: 'md' },
+      { label: 'Need to understand & adopt AI', value: 'training', icon: 'service-ai', iconSize: 'md' },
     ],
   },
   {
     id: 'size',
     question: 'How large is your team or business?',
     options: [
-      { label: 'Just me / freelancer', value: 'solo', icon: '👤' },
-      { label: 'Small team (2–15 people)', value: 'small', icon: '👥' },
-      { label: 'Medium business (16–100)', value: 'medium', icon: '🏢' },
-      { label: 'Large organisation (100+)', value: 'large', icon: '🏛️' },
+      { label: 'Just me / freelancer', value: 'solo', icon: '👤', iconSize: 'md', isEmoji: true },
+      { label: 'Small team (2–15 people)', value: 'small', icon: '👥', iconSize: 'md', isEmoji: true },
+      { label: 'Medium business (16–100)', value: 'medium', icon: '🏢', iconSize: 'md', isEmoji: true },
+      { label: 'Large organisation (100+)', value: 'large', icon: '🏛️', iconSize: 'md', isEmoji: true },
     ],
   },
   {
     id: 'urgency',
     question: 'How soon do you need a solution?',
     options: [
-      { label: 'As soon as possible (< 1 month)', value: 'urgent', icon: '🔥' },
-      { label: 'Within 3 months', value: 'near', icon: '📅' },
-      { label: 'Within 6 months', value: 'medium', icon: '🗓️' },
-      { label: 'Just exploring for now', value: 'exploring', icon: '🔭' },
+      { label: 'As soon as possible (< 1 month)', value: 'urgent', icon: '🔥', iconSize: 'md', isEmoji: true },
+      { label: 'Within 3 months', value: 'near', icon: '📅', iconSize: 'md', isEmoji: true },
+      { label: 'Within 6 months', value: 'medium', icon: '🗓️', iconSize: 'md', isEmoji: true },
+      { label: 'Just exploring for now', value: 'exploring', icon: '🔭', iconSize: 'md', isEmoji: true },
     ],
   },
   {
     id: 'budget',
     question: 'What is your approximate budget?',
     options: [
-      { label: 'Under UGX 1,000,000', value: 'micro', icon: '💵' },
-      { label: 'UGX 1M – 5M', value: 'small', icon: '💰' },
-      { label: 'UGX 5M – 20M', value: 'medium', icon: '💎' },
-      { label: 'UGX 20M+', value: 'large', icon: '🏆' },
+      { label: 'Under UGX 1,000,000', value: 'micro', icon: '💵', iconSize: 'md', isEmoji: true },
+      { label: 'UGX 1M – 5M', value: 'small', icon: '💰', iconSize: 'md', isEmoji: true },
+      { label: 'UGX 5M – 20M', value: 'medium', icon: '💎', iconSize: 'md', isEmoji: true },
+      { label: 'UGX 20M+', value: 'large', icon: '🏆', iconSize: 'md', isEmoji: true },
     ],
   },
   {
     id: 'tech',
     question: "How technical is your team?",
     options: [
-      { label: 'No technical background', value: 'none', icon: '📝' },
-      { label: 'Basic — use spreadsheets & email', value: 'basic', icon: '📋' },
-      { label: 'Moderate — some tools/software', value: 'moderate', icon: '🔧' },
-      { label: 'Technical / have developers', value: 'high', icon: '⚡' },
+      { label: 'No technical background', value: 'none', icon: '📝', iconSize: 'md', isEmoji: true },
+      { label: 'Basic — use spreadsheets & email', value: 'basic', icon: '📋', iconSize: 'md', isEmoji: true },
+      { label: 'Moderate — some tools/software', value: 'moderate', icon: '🔧', iconSize: 'md', isEmoji: true },
+      { label: 'Technical / have developers', value: 'high', icon: '⚡', iconSize: 'md', isEmoji: true },
     ],
   },
 ];
@@ -70,7 +71,7 @@ function getRecommendation(answers) {
       outcome: "A team that can identify AI opportunities, evaluate tools, and champion adoption internally.",
       applyService: 'AI+Awareness+Sessions',
       urgencyNote: urgency === 'urgent' ? 'We can schedule a session within 2 weeks.' : 'We run cohorts monthly — easy to fit your calendar.',
-      icon: '🎓',
+      icon: 'service-ai',
       color: '#7c3aed',
     };
   }
@@ -84,7 +85,7 @@ function getRecommendation(answers) {
         outcome: "Save 5-15 hours per week by automating repetitive tasks — email, forms, data syncing, reports.",
         applyService: 'N8N+Workflow+Automation',
         urgencyNote: 'Simple automations can go live in 1-2 weeks.',
-        icon: '⚡',
+        icon: 'service-automation',
         color: '#0ea5e9',
       };
     }
@@ -95,7 +96,7 @@ function getRecommendation(answers) {
       outcome: "End-to-end automated workflows that run 24/7, reducing errors and freeing your team for high-value work.",
       applyService: 'N8N+Workflow+Automation',
       urgencyNote: urgency === 'urgent' ? 'We can deliver a first automation in under 3 weeks.' : 'Full automation suite typically delivered in 4-8 weeks.',
-      icon: '⚙️',
+      icon: 'service-automation',
       color: '#0ea5e9',
     };
   }
@@ -109,7 +110,7 @@ function getRecommendation(answers) {
         outcome: "Replace scattered spreadsheets with one live dashboard your whole leadership team can use daily.",
         applyService: 'BI+Dashboards',
         urgencyNote: 'First dashboard prototype delivered within 2-3 weeks.',
-        icon: '📊',
+        icon: 'service-analytics',
         color: '#059669',
       };
     }
@@ -120,7 +121,7 @@ function getRecommendation(answers) {
       outcome: "Data-driven decisions backed by statistical models, not guesswork. Measurable ROI from reduced churn or optimised operations.",
       applyService: 'Predictive+Modeling',
       urgencyNote: 'Initial model and insights delivered within 4-6 weeks.',
-      icon: '🔮',
+      icon: 'service-analytics',
       color: '#7c3aed',
     };
   }
@@ -134,7 +135,7 @@ function getRecommendation(answers) {
         outcome: "A clearly scoped MVP that can be delivered in 6-10 weeks, with full product roadmap for subsequent phases.",
         applyService: 'Custom+Software+Development',
         urgencyNote: 'Discovery call can be scheduled this week. MVP build starts immediately after.',
-        icon: '💻',
+        icon: 'service-dev',
         color: '#1c265e',
       };
     }
@@ -145,7 +146,7 @@ function getRecommendation(answers) {
       outcome: "A production-ready application tailored to your users, with clear documentation and ongoing support options.",
       applyService: 'Custom+Software+Development',
       urgencyNote: 'Full project timeline scoped during free discovery call.',
-      icon: '🚀',
+      icon: 'service-dev',
       color: '#1c265e',
     };
   }
@@ -158,7 +159,7 @@ function getRecommendation(answers) {
     outcome: "A clear, prioritised AI roadmap with vendor recommendations, budget estimates, and a phased implementation plan.",
     applyService: 'AI+Consulting',
     urgencyNote: 'Initial free consultation can be scheduled within 48 hours.',
-    icon: '🧠',
+    icon: 'service-ai',
     color: '#1c265e',
   };
 }
@@ -217,7 +218,14 @@ export default function ServiceRecommender() {
     return (
       <div className="sr-card">
         <div className="sr-intro">
-          <div className="sr-intro-icon">🎯</div>
+          <div className="sr-intro-icon">
+            <Icon
+              name="ui-target"
+              size="lg"
+              color="primary"
+              ariaLabel="Find your perfect service icon"
+            />
+          </div>
           <h3>Find Your Perfect Service</h3>
           <p>Answer 5 quick questions and we'll recommend the exact Junior Reactive service that fits your situation — no sales pressure, just honest guidance.</p>
           <div className="sr-intro-meta">
@@ -237,7 +245,14 @@ export default function ServiceRecommender() {
     return (
       <div className="sr-card sr-result-card">
         <div className="sr-result-header" style={{ '--rec-color': recommendation.color }}>
-          <div className="sr-result-icon">{recommendation.icon}</div>
+          <div className="sr-result-icon">
+            <Icon
+              name={recommendation.icon}
+              size="lg"
+              color="primary"
+              ariaLabel={`${recommendation.primary} recommendation icon`}
+            />
+          </div>
           <div className="sr-result-badge">Our Recommendation</div>
           <h3 className="sr-result-title">{recommendation.primary}</h3>
           {recommendation.secondary && (
@@ -297,7 +312,18 @@ export default function ServiceRecommender() {
             className={`sr-option ${selected === opt.value ? 'selected' : ''}`}
             onClick={() => handleSelect(opt.value)}
           >
-            <span className="sr-option-icon">{opt.icon}</span>
+            <span className="sr-option-icon">
+              {opt.isEmoji ? (
+                opt.icon
+              ) : (
+                <Icon
+                  name={opt.icon}
+                  size={opt.iconSize || 'md'}
+                  color="primary"
+                  ariaLabel={opt.label}
+                />
+              )}
+            </span>
             <span className="sr-option-label">{opt.label}</span>
             {selected === opt.value && <span className="sr-option-check">✓</span>}
           </button>

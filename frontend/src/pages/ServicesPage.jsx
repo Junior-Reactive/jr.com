@@ -5,20 +5,73 @@ import { contentService } from '../services/contentService';
 import HeroSection from '../components/layout/HeroSection';
 import { SkeletonGrid } from '../components/common/SkeletonLoader';
 import ErrorState from '../components/common/ErrorState';
+import Icon from '../assets/icons/components/Icon';
 
-const ServiceCard = ({ service }) => (
+// Map emoji to icon names
+const emojiToIconMap = {
+  '🤖': 'service-ai',
+  '💻': 'service-dev',
+  '🖥️': 'service-dev',
+  '⚙️': 'service-automation',
+  '🔄': 'service-automation',
+  '📊': 'service-analytics',
+};
+
+// Map service type/key to icon name (fallback)
+const serviceKeyToIconMap = {
+  'ai-consulting': 'service-ai',
+  'ai-awareness-sessions': 'service-ai',
+  'ai-courses-training': 'service-ai',
+  'custom-development': 'service-dev',
+  'custom-software-development': 'service-dev',
+  'n8n-workflow-automation': 'service-automation',
+  'business-intelligence-dashboard': 'service-analytics',
+  'data-analytics': 'service-analytics',
+  'predictive-modeling': 'service-analytics',
+};
+
+const getIconName = (service) => {
+  // Try emoji mapping first
+  if (service.icon && emojiToIconMap[service.icon]) {
+    return emojiToIconMap[service.icon];
+  }
+  // Try service key mapping
+  if (service.key && serviceKeyToIconMap[service.key.toLowerCase()]) {
+    return serviceKeyToIconMap[service.key.toLowerCase()];
+  }
+  // Default fallback
+  return 'service-ai';
+};
+
+const getAriaLabel = (service) => {
+  return `${service.title} service icon`;
+};
+
+const ServiceCard = ({ service }) => {
+  const iconName = getIconName(service);
+  const ariaLabel = getAriaLabel(service);
+
+  return (
     <div className="card">
-        <div className="card-icon">{service.icon}</div>
-        <h3 style={{ marginBottom: 10, fontSize: '1.1rem' }}>{service.title}</h3>
-        <p style={{ fontSize: '.875rem', flex: 1 }}>{service.shortDescription}</p>
-        <Link
-            to={`/services/${service.key}`}
-            style={{ display:'inline-flex',alignItems:'center',gap:6,color:'var(--color-secondary)',fontWeight:700,fontSize:'.875rem',marginTop:12 }}
-        >
-            Learn More →
-        </Link>
+      <div className="card-icon">
+        <Icon
+          name={iconName}
+          size="lg"
+          color="primary"
+          ariaLabel={ariaLabel}
+        />
+      </div>
+      <h3 style={{ marginBottom: 10, fontSize: '1.1rem' }}>{service.title}</h3>
+      <p style={{ fontSize: '.875rem', flex: 1 }}>{service.shortDescription}</p>
+      <Link
+          to={`/services/${service.key}`}
+          style={{ display:'inline-flex',alignItems:'center',gap:6,color:'var(--color-secondary)',fontWeight:700,fontSize:'.875rem',marginTop:12 }}
+      >
+          Learn More →
+      </Link>
     </div>
-);
+  );
+};
 
 const ServicesPage = () => {
     const { data, isLoading, isError, refetch } = useQuery({
