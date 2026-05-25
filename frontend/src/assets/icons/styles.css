@@ -1,0 +1,75 @@
+/* frontend/src/assets/icons/styles.css */
+
+/* ── Base Icon Styles ────────────────────────────────────────────── */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── Size Variants ──────────────────────────────────────────────── */
+.icon-sm { width: 24px; height: 24px; }
+.icon-md { width: 32px; height: 32px; }
+.icon-lg { width: 48px; height: 48px; }
+.icon-xl { width: 64px; height: 64px; }
+
+/* ── Color Variants ────────────────────────────────────────────── */
+.icon-primary { --icon-color: #5269c3; }
+.icon-secondary { --icon-color: #1c265e; }
+.icon-accent { --icon-color: #90a0da; }
+.icon-success { --icon-color: #10b981; }
+.icon-error { --icon-color: #ef4444; }
+.icon-white { --icon-color: #ffffff; }
+
+/* ── Hover Effects ──────────────────────────────────────────────– */
+button .icon,
+a .icon,
+.icon-interactive {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover .icon,
+a:hover .icon,
+.icon-interactive:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+button:active .icon,
+a:active .icon {
+  transform: scale(0.95);
+}
+
+/* ── Tooltip Support ────────────────────────────────────────────── */
+[title] {
+  position: relative;
+}
+
+/* ── Accessibility ──────────────────────────────────────────────– */
+@media (prefers-reduced-motion: reduce) {
+  .icon,
+  button .icon,
+  a .icon {
+    transition: none;
+  }
+
+  button:hover .icon,
+  a:hover .icon {
+    transform: none;
+  }
+}
+
+/* ── Dark Mode Support (future) ────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .icon-white {
+    --icon-color: #ffffff;
+  }
+}
