@@ -4,6 +4,7 @@ import { contentService } from '../services/contentService';
 import HeroSection from '../components/layout/HeroSection';
 import { SkeletonGrid, SkeletonTeamCard } from '../components/common/SkeletonLoader';
 import ErrorState from '../components/common/ErrorState';
+import Icon from '../assets/icons/components/Icon';
 
 // Generate a deterministic gradient and initials avatar for each team member
 const AVATAR_GRADIENTS = [
@@ -100,7 +101,11 @@ const TeamPage = () => {
                             onRetry={refetch}
                         />
                     ) : members.length === 0 ? (
-                        <ErrorState icon="👤" title="No team members yet" message="Team profiles will appear here once added to the database." />
+                        <ErrorState
+                            title="No team members yet"
+                            message="Team profiles will appear here once added to the database."
+                            renderIcon={() => <Icon name="state-user" size="lg" ariaLabel="No team members" />}
+                        />
                     ) : (
                         <div className="services-grid">
                             {members.map((member, i) => (

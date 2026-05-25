@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { submissionService } from '../../services/submissionService';
 import Button from '../common/Button';
+import Icon from '../../assets/icons/components/Icon';
 
 const ContactForm = () => {
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -43,7 +44,10 @@ const ContactForm = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="email">Email Address *</label>
+                        <label htmlFor="email" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Icon name="action-email" size="sm" ariaLabel="Email field" />
+                            Email Address *
+                        </label>
                         <input
                             type="email" id="email" name="email"
                             value={formData.email} onChange={handleChange}

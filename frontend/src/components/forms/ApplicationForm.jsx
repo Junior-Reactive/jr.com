@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { submissionService } from '../../services/submissionService';
 import Button from '../common/Button';
+import Icon from '../../assets/icons/components/Icon';
 
 const SERVICES = [
     'General Inquiry',
@@ -67,7 +68,10 @@ const ApplicationForm = () => {
                             <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Full name" required />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="email">Email Address *</label>
+                            <label htmlFor="email" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Icon name="action-email" size="sm" ariaLabel="Email field" />
+                                Email Address *
+                            </label>
                             <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@company.com" required />
                         </div>
                         <div className="form-group">
@@ -93,7 +97,10 @@ const ApplicationForm = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="requirements">Project Requirements *</label>
+                        <label htmlFor="requirements" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Icon name="action-document" size="sm" ariaLabel="Document/requirements field" />
+                            Project Requirements *
+                        </label>
                         <textarea
                             id="requirements" name="requirements" rows={6}
                             value={formData.requirements} onChange={handleChange}

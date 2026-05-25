@@ -6,9 +6,10 @@ const ErrorState = ({
     message,
     onRetry,
     retryLabel = 'Try Again',
+    renderIcon = null,
 }) => (
     <div className="error-state">
-        <div className="error-icon">{icon}</div>
+        <div className="error-icon">{renderIcon ? renderIcon() : icon}</div>
         <h3>{title}</h3>
         {message && <p>{message}</p>}
         {onRetry && (

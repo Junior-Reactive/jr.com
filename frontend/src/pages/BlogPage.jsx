@@ -5,6 +5,7 @@ import { contentService } from '../services/contentService';
 import HeroSection from '../components/layout/HeroSection';
 import { SkeletonBlogCard, SkeletonGrid } from '../components/common/SkeletonLoader';
 import ErrorState from '../components/common/ErrorState';
+import Icon from '../assets/icons/components/Icon';
 
 const BlogPage = () => {
     const { data, isLoading, isError, refetch } = useQuery({
@@ -34,9 +35,9 @@ const BlogPage = () => {
                         />
                     ) : posts.length === 0 ? (
                         <ErrorState
-                            icon="📝"
                             title="No posts yet"
                             message="Blog posts will appear here once published."
+                            renderIcon={() => <Icon name="action-document" size="lg" ariaLabel="No blog posts" />}
                         />
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>

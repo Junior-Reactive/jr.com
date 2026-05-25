@@ -18,20 +18,20 @@ const QUESTIONS = [
     id: 'size',
     question: 'How large is your team or business?',
     options: [
-      { label: 'Just me / freelancer', value: 'solo', icon: '👤', iconSize: 'md', isEmoji: true },
-      { label: 'Small team (2–15 people)', value: 'small', icon: '👥', iconSize: 'md', isEmoji: true },
-      { label: 'Medium business (16–100)', value: 'medium', icon: '🏢', iconSize: 'md', isEmoji: true },
-      { label: 'Large organisation (100+)', value: 'large', icon: '🏛️', iconSize: 'md', isEmoji: true },
+      { label: 'Just me / freelancer', value: 'solo', icon: 'state-user', iconSize: 'md' },
+      { label: 'Small team (2–15 people)', value: 'small', icon: 'state-team', iconSize: 'md' },
+      { label: 'Medium business (16–100)', value: 'medium', icon: 'state-team', iconSize: 'md' },
+      { label: 'Large organisation (100+)', value: 'large', icon: 'state-team', iconSize: 'md' },
     ],
   },
   {
     id: 'urgency',
     question: 'How soon do you need a solution?',
     options: [
-      { label: 'As soon as possible (< 1 month)', value: 'urgent', icon: '🔥', iconSize: 'md', isEmoji: true },
-      { label: 'Within 3 months', value: 'near', icon: '📅', iconSize: 'md', isEmoji: true },
-      { label: 'Within 6 months', value: 'medium', icon: '🗓️', iconSize: 'md', isEmoji: true },
-      { label: 'Just exploring for now', value: 'exploring', icon: '🔭', iconSize: 'md', isEmoji: true },
+      { label: 'As soon as possible (< 1 month)', value: 'urgent', icon: 'service-automation', iconSize: 'md' },
+      { label: 'Within 3 months', value: 'near', icon: 'action-document', iconSize: 'md' },
+      { label: 'Within 6 months', value: 'medium', icon: 'action-document', iconSize: 'md' },
+      { label: 'Just exploring for now', value: 'exploring', icon: 'ui-target', iconSize: 'md' },
     ],
   },
   {
@@ -41,17 +41,17 @@ const QUESTIONS = [
       { label: 'Under UGX 1,000,000', value: 'micro', icon: '💵', iconSize: 'md', isEmoji: true },
       { label: 'UGX 1M – 5M', value: 'small', icon: '💰', iconSize: 'md', isEmoji: true },
       { label: 'UGX 5M – 20M', value: 'medium', icon: '💎', iconSize: 'md', isEmoji: true },
-      { label: 'UGX 20M+', value: 'large', icon: '🏆', iconSize: 'md', isEmoji: true },
+      { label: 'UGX 20M+', value: 'large', icon: 'ui-target', iconSize: 'md' },
     ],
   },
   {
     id: 'tech',
     question: "How technical is your team?",
     options: [
-      { label: 'No technical background', value: 'none', icon: '📝', iconSize: 'md', isEmoji: true },
-      { label: 'Basic — use spreadsheets & email', value: 'basic', icon: '📋', iconSize: 'md', isEmoji: true },
-      { label: 'Moderate — some tools/software', value: 'moderate', icon: '🔧', iconSize: 'md', isEmoji: true },
-      { label: 'Technical / have developers', value: 'high', icon: '⚡', iconSize: 'md', isEmoji: true },
+      { label: 'No technical background', value: 'none', icon: 'action-document', iconSize: 'md' },
+      { label: 'Basic — use spreadsheets & email', value: 'basic', icon: 'action-document', iconSize: 'md' },
+      { label: 'Moderate — some tools/software', value: 'moderate', icon: 'ui-settings', iconSize: 'md' },
+      { label: 'Technical / have developers', value: 'high', icon: 'service-dev', iconSize: 'md' },
     ],
   },
 ];
@@ -320,7 +320,7 @@ export default function ServiceRecommender() {
                   name={opt.icon}
                   size={opt.iconSize || 'md'}
                   color="primary"
-                  ariaLabel={opt.label}
+                  ariaLabel={`${opt.label} option`}
                 />
               )}
             </span>

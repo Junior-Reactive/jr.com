@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { contentService } from '../services/contentService';
 import { SkeletonText } from '../components/common/SkeletonLoader';
 import ErrorState from '../components/common/ErrorState';
+import Icon from '../assets/icons/components/Icon';
 
 const BlogPostPage = () => {
     const { slug } = useParams();
@@ -73,9 +74,15 @@ const BlogPostPage = () => {
                         alignItems: 'center', color: 'rgba(255,255,255,.7)',
                         fontSize: '0.875rem', flexWrap: 'wrap',
                     }}>
-                        <span>✍️ {post.author}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Icon name="state-user" size="sm" color="white" ariaLabel="Author" />
+                            <span>{post.author}</span>
+                        </div>
                         <span>·</span>
-                        <span>📅 {post.formattedDate}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Icon name="action-document" size="sm" color="white" ariaLabel="Date published" />
+                            <span>{post.formattedDate}</span>
+                        </div>
                     </div>
                 </div>
             </section>
