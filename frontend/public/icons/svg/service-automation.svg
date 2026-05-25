@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Workflow/Automation -->
+  <rect x="2" y="4" width="5" height="5" rx="1" />
+  <rect x="17" y="4" width="5" height="5" rx="1" />
+  <rect x="9" y="14" width="6" height="6" rx="1" />
+  <path d="M7 9v2a2 2 0 0 1 2 2h2" />
+  <path d="M17 9v2a2 2 0 0 0-2 2h-2" />
+  <line x1="12" y1="13" x2="12" y2="11" />
+</svg>
