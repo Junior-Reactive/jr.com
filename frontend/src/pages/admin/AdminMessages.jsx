@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getMessages, replyToMessage, deleteMessage, markMessageRead } from '../../services/adminService';
+import Icon from '../../assets/icons/components/Icon';
 
 const fmt = (ts) => ts ? new Date(ts).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
@@ -54,7 +55,7 @@ function ReplyModal({ message, onClose, onSent }) {
                 <div className="admin-modal-footer">
                     <button className="admin-btn admin-btn-ghost" onClick={onClose}>Cancel</button>
                     <button className="admin-btn admin-btn-primary" onClick={handleSend} disabled={loading || !body.trim()}>
-                        {loading ? <><span className="admin-spinner-sm" /> Sending…</> : '✉️ Send Reply'}
+                        {loading ? <><span className="admin-spinner-sm" /> Sending…</> : <><Icon name="action-email" size="sm" ariaLabel="Send email" className="admin-btn-icon" /> Send Reply</>}
                     </button>
                 </div>
             </div>
@@ -172,7 +173,7 @@ export default function AdminMessages() {
                     <div className="admin-loading"><div className="admin-spinner" /></div>
                 ) : filtered.length === 0 ? (
                     <div className="admin-empty-state">
-                        <div className="admin-empty-icon">✉️</div>
+                        <div className="admin-empty-icon"><Icon name="ui-messages" size="lg" ariaLabel="Messages" /></div>
                         <p>No messages here</p>
                     </div>
                 ) : (

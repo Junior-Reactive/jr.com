@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getAnalytics } from '../../services/adminService';
+import Icon from '../../assets/icons/components/Icon';
 
 function StatPill({ label, value, color }) {
     return (
@@ -97,10 +98,14 @@ export default function AdminAnalytics() {
                         <div className="admin-device-list">
                             {data.devices.map((d, i) => {
                                 const pct = Math.round((parseInt(d.total) / totalDevices) * 100);
-                                const icons = { mobile: '📱', tablet: '📲', desktop: '🖥️' };
                                 return (
                                     <div className="admin-device-row" key={i}>
-                                        <span className="admin-device-icon">{icons[d.device_type] || '💻'}</span>
+                                        <span className="admin-device-icon">
+                                            {d.device_type === 'mobile' && <Icon name="state-user" size="sm" ariaLabel="Mobile device" />}
+                                            {d.device_type === 'tablet' && <Icon name="state-user" size="sm" ariaLabel="Tablet device" />}
+                                            {d.device_type === 'desktop' && <Icon name="state-team" size="sm" ariaLabel="Desktop device" />}
+                                            {!['mobile', 'tablet', 'desktop'].includes(d.device_type) && <Icon name="ui-settings" size="sm" ariaLabel="Device" />}
+                                        </span>
                                         <div className="admin-device-info">
                                             <div className="admin-device-name">
                                                 {d.device_type?.charAt(0).toUpperCase() + d.device_type?.slice(1)}
@@ -121,7 +126,7 @@ export default function AdminAnalytics() {
 
             {/* GA embed note */}
             <div className="admin-card admin-ga-note">
-                <div className="admin-ga-note-icon">📊</div>
+                <div className="admin-ga-note-icon"><Icon name="service-analytics" size="md" ariaLabel="Analytics" /></div>
                 <div>
                     <h4>Google Analytics also connected</h4>
                     <p>Full funnel analytics, acquisition data, and real-time visitors are available in your Google Analytics dashboard. Add your GA Measurement ID to <code>frontend/.env</code> as <code>REACT_APP_GA_ID</code> to activate it.</p>
