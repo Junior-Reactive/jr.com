@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { contentService } from '../services/contentService';
 import HeroSection from '../components/layout/HeroSection';
 import { SkeletonGrid } from '../components/common/SkeletonLoader';
+import Icon from '../assets/icons/components/Icon';
 
 const STATS = [
     { number: '50+',  label: 'Projects Delivered' },
@@ -13,27 +14,31 @@ const STATS = [
 ];
 
 const FALLBACK_SERVICES = [
-    { id: 1, key: 'n8n-automation', icon: '⚡', title: 'N8N Workflow Automation',  shortDescription: 'Connect your tools and automate repetitive processes with powerful visual N8N workflows.' },
-    { id: 2, key: 'ai-consulting',  icon: '🧠', title: 'AI Consulting',              shortDescription: 'Strategic AI roadmaps that turn business challenges into intelligent, automated solutions.' },
-    { id: 3, key: 'ai-courses',     icon: '📚', title: 'AI Courses & Training',      shortDescription: 'Structured, practical AI education programmes for individuals and corporate teams.' },
+    { id: 1, key: 'n8n-automation', iconName: 'service-automation', title: 'N8N Workflow Automation',  shortDescription: 'Connect your tools and automate repetitive processes with powerful visual N8N workflows.' },
+    { id: 2, key: 'ai-consulting',  iconName: 'service-ai', title: 'AI Consulting',              shortDescription: 'Strategic AI roadmaps that turn business challenges into intelligent, automated solutions.' },
+    { id: 3, key: 'ai-courses',     iconName: 'service-dev', title: 'AI Courses & Training',      shortDescription: 'Structured, practical AI education programmes for individuals and corporate teams.' },
 ];
 
 const WHY_US = [
-    { icon: '🧠', title: 'AI-First Approach',    desc: "Every solution we build leverages the latest AI capabilities — not as a buzzword, but as genuine business value." },
-    { icon: '🔧', title: 'End-to-End Ownership', desc: "We stay with you from strategy through deployment and beyond. Your success is our metric." },
-    { icon: '🌍', title: 'Built for Africa',     desc: "Deep understanding of East African business environments means solutions that actually work in the real world." },
+    { iconName: 'service-ai', title: 'AI-First Approach',    desc: "Every solution we build leverages the latest AI capabilities — not as a buzzword, but as genuine business value." },
+    { iconName: 'ui-settings', title: 'End-to-End Ownership', desc: "We stay with you from strategy through deployment and beyond. Your success is our metric." },
+    { iconName: 'ui-target', title: 'Built for Africa',     desc: "Deep understanding of East African business environments means solutions that actually work in the real world." },
 ];
 
-const ServiceCard = ({ service }) => (
-    <div className="card">
-        <div className="card-icon">{service.icon}</div>
-        <h3 style={{ marginBottom: 10, fontSize: '1.1rem' }}>{service.title}</h3>
-        <p style={{ fontSize: '.875rem', flex: 1 }}>{service.shortDescription}</p>
-        <Link to={`/services/${service.key}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--color-secondary)', fontWeight: 700, fontSize: '.875rem', marginTop: 12 }}>
-            Learn More →
-        </Link>
-    </div>
-);
+const ServiceCard = ({ service }) => {
+    return (
+        <div className="card">
+            <div className="card-icon">
+                <Icon name={service.iconName} size="lg" color="primary" ariaLabel={`${service.title} icon`} />
+            </div>
+            <h3 style={{ marginBottom: 10, fontSize: '1.1rem' }}>{service.title}</h3>
+            <p style={{ fontSize: '.875rem', flex: 1 }}>{service.shortDescription}</p>
+            <Link to={`/services/${service.key}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--color-secondary)', fontWeight: 700, fontSize: '.875rem', marginTop: 12 }}>
+                Learn More →
+            </Link>
+        </div>
+    );
+};
 
 // CEO photo with beautiful gradient-avatar fallback
 const CEOPhoto = () => {
@@ -155,7 +160,9 @@ const HomePage = () => {
                     <div className="services-grid">
                         {WHY_US.map(item => (
                             <div className="card" key={item.title}>
-                                <div className="card-icon">{item.icon}</div>
+                                <div className="card-icon">
+                                    <Icon name={item.iconName} size="lg" color="primary" ariaLabel={`${item.title} icon`} />
+                                </div>
                                 <h3>{item.title}</h3>
                                 <p style={{ fontSize: '.9rem' }}>{item.desc}</p>
                             </div>

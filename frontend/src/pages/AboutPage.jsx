@@ -1,13 +1,43 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import HeroSection from '../components/layout/HeroSection';
+import Icon from '../assets/icons/components/Icon';
 
 const VALUES = [
-    { icon: '💡', title: 'Innovation', desc: 'Constantly pushing the boundaries of what technology can do for your business.' },
-    { icon: '🤝', title: 'Integrity', desc: 'Transparent, honest relationships with every client — always.' },
-    { icon: '🏆', title: 'Excellence', desc: 'We hold every deliverable to the highest professional standard.' },
-    { icon: '🌱', title: 'Growth', desc: 'We grow with our clients, adapting and evolving as their needs change.' },
+    { iconName: 'ui-target', title: 'Innovation', desc: 'Constantly pushing the boundaries of what technology can do for your business.' },
+    { iconName: 'state-team', title: 'Integrity', desc: 'Transparent, honest relationships with every client — always.' },
+    { iconName: 'ui-settings', title: 'Excellence', desc: 'We hold every deliverable to the highest professional standard.' },
+    { iconName: 'action-rocket', title: 'Growth', desc: 'We grow with our clients, adapting and evolving as their needs change.' },
 ];
+
+const FounderCard = () => {
+    const [imgOk, setImgOk] = React.useState(true);
+
+    return (
+        <div className="team-card" style={{ maxWidth: 360, width: '100%' }}>
+            <div className="team-img-wrap">
+                {imgOk ? (
+                    <img
+                        src="/images/team/Pharrell.jpeg"
+                        alt="Pharrell Aaron Mugumya"
+                        onError={() => setImgOk(false)}
+                    />
+                ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                        <Icon name="state-user" size="xl" color="primary" ariaLabel="Team member avatar" />
+                    </div>
+                )}
+            </div>
+            <div className="team-card-body">
+                <h3 style={{ marginBottom: 4 }}>Pharrell Aaron Mugumya</h3>
+                <p className="position">Founder & CEO</p>
+                <p style={{ fontSize: '0.875rem' }}>
+                    Passionate technologist dedicated to leveraging AI and software to create meaningful impact across African businesses.
+                </p>
+            </div>
+        </div>
+    );
+};
 
 const AboutPage = () => (
     <main>
@@ -51,7 +81,7 @@ const AboutPage = () => (
                         position: 'relative',
                         overflow: 'hidden',
                     }}>
-                        <div style={{ fontSize: '4rem', marginBottom: 8 }}>🌍</div>
+                        <Icon name="ui-target" size="xl" color="white" ariaLabel="Global reach" />
                         <h3 style={{ color: 'white', margin: 0, fontFamily: 'var(--font-display)' }}>Built in Uganda,</h3>
                         <h3 style={{ color: 'rgba(255,255,255,.7)', margin: 0, fontFamily: 'var(--font-display)' }}>Built for the World</h3>
                         <p style={{ color: 'rgba(255,255,255,.7)', margin: '12px 0 0', fontSize: '0.9rem' }}>
@@ -72,7 +102,9 @@ const AboutPage = () => (
                 <div className="services-grid">
                     {VALUES.map((v) => (
                         <div className="card" key={v.title}>
-                            <div className="card-icon">{v.icon}</div>
+                            <div className="card-icon">
+                                <Icon name={v.iconName} size="lg" color="primary" ariaLabel={`${v.title} value icon`} />
+                            </div>
                             <h3>{v.title}</h3>
                             <p style={{ fontSize: '0.9rem' }}>{v.desc}</p>
                         </div>
@@ -89,28 +121,7 @@ const AboutPage = () => (
                     <h2 className="section-title">Meet the Founder</h2>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <div className="team-card" style={{ maxWidth: 360, width: '100%' }}>
-                        <div className="team-img-wrap">
-                            <img
-                                src="/images/team/Pharrell.jpeg"
-                                alt="Pharrell Aaron Mugumya"
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.parentElement.style.display = 'flex';
-                                    e.target.parentElement.style.alignItems = 'center';
-                                    e.target.parentElement.style.justifyContent = 'center';
-                                    e.target.parentElement.innerHTML = '<span style="font-size:4rem">👤</span>';
-                                }}
-                            />
-                        </div>
-                        <div className="team-card-body">
-                            <h3 style={{ marginBottom: 4 }}>Pharrell Aaron Mugumya</h3>
-                            <p className="position">Founder & CEO</p>
-                            <p style={{ fontSize: '0.875rem' }}>
-                                Passionate technologist dedicated to leveraging AI and software to create meaningful impact across African businesses.
-                            </p>
-                        </div>
-                    </div>
+                    <FounderCard />
                 </div>
                 <div style={{ textAlign: 'center', marginTop: 32 }}>
                     <Link to="/team" className="btn btn-outline">View Full Team</Link>
